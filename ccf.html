@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cengage Control Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+        }
+        .chart-tooltip {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 12px;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar absolute md:relative z-20 w-64 bg-white shadow-lg p-6 space-y-6 md:transform-none">
+            <div class="flex items-center justify-between">
+                <h1 class="text-2xl font-bold text-blue-600">Control Center</h1>
+                <button id="close-sidebar" class="md:hidden text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Filters -->
+            <div>
+                <h2 class="text-lg font-semibold mb-3 text-gray-700">Filters</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="market-filter" class="block text-sm font-medium text-gray-600">Market</label>
+                        <select id="market-filter" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option>All Markets</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="system-filter" class="block text-sm font-medium text-gray-600">System</label>
+                        <select id="system-filter" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option>All Systems</option>
+                        </select>
+                    </div>
+                     <div>
+                        <label for="control-filter" class="block text-sm font-medium text-gray-600">Control Name</label>
+                        <select id="control-filter" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option>All Controls</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="maturity-filter" class="block text-sm font-medium text-gray-600">Control Maturity</label>
+                        <select id="maturity-filter" class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option>All Maturities</option>
+                            <option>Levels 0-2 (Initial)</option>
+                            <option>Level 3 (Defined)</option>
+                            <option>Level 4 (Managed)</option>
+                            <option>Level 5 (Optimized)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System List -->
+            <div class="flex-1 overflow-y-auto">
+                <h2 class="text-lg font-semibold mb-3 text-gray-700">Systems</h2>
+                <ul id="system-list" class="space-y-2">
+                    <!-- Systems will be dynamically populated here -->
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
+            <div class="container mx-auto px-6 py-8">
+                <button id="open-sidebar" class="md:hidden mb-4 p-2 rounded-md bg-white text-gray-600 hover:bg-gray-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+
+                <!-- Executive Dashboard -->
+                <div id="dashboard-view">
+                    <h2 class="text-3xl font-bold mb-6 text-gray-800">Executive Dashboard</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Total Systems Assessed</p>
+                                <p id="total-systems" class="text-3xl font-bold">0</p>
+                            </div>
+                            <div class="bg-blue-100 p-3 rounded-full">
+                                <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Avg. Control Maturity</p>
+                                <p id="avg-maturity" class="text-3xl font-bold">0.0</p>
+                            </div>
+                            <div class="bg-green-100 p-3 rounded-full">
+                                <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                        </div>
+                         <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">N/A Controls</p>
+                                <p id="na-controls" class="text-3xl font-bold">0</p>
+                            </div>
+                            <div class="bg-gray-100 p-3 rounded-full">
+                               <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">AI Flagged Controls</p>
+                                <p id="ai-flagged" class="text-3xl font-bold">0</p>
+                            </div>
+                            <div class="bg-yellow-100 p-3 rounded-full">
+                                <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547a2 2 0 00-.547 1.806l.477 2.387a6 6 0 00.517 3.86l.158.318a6 6 0 00.517 3.86l2.387.477a2 2 0 001.806-.547a2 2 0 00.547-1.806l-.477-2.387a6 6 0 00-.517-3.86l-.158-.318a6 6 0 00-.517-3.86l-2.387-.477z"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-semibold mb-4">Control Maturity Heatmap</h3>
+                        <div class="relative h-[600px]">
+                            <canvas id="maturityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Detail View -->
+                <div id="detail-view" class="hidden">
+                    <button id="back-to-dashboard" class="mb-4 text-blue-600 hover:underline">&larr; Back to Dashboard</button>
+                    <h2 id="detail-system-name" class="text-3xl font-bold mb-2"></h2>
+                    <p id="detail-system-market" class="text-lg text-gray-600 mb-6"></p>
+                    <div class="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Control Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Domain</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Maturity</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comments</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detail-control-list" class="bg-white divide-y divide-gray-200">
+                                <!-- Control details will be dynamically populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Data ---
+            const fileData = {
+                "ACMS-CCF Control List.csv": `Control,Control Name,Control Description,Control Domain,Comments,Control Maturity,Inherent Impact,Inherent Likelihood,Residual Impact,Residual Likelihood,Residual Risk Rating,Control Help,Control Maturity Rating Help,In-Scope,Anti-piracy Flag,Ransomware Flag,AI Flag\n,,System Name,ACMS Application,,,,,,,,,,,,,\n,,Market (HE/K-12/Skills/Gale),All markets,,,,,,,,,,,,,\nAccount Management - Onboarding,AC-2,Desc,Identification & Authentication,"Local users, Maintained by the team",1 - Initial/Ad-hoc,,,,,,,,Yes,,Y,Y\nAccount Management - Offboarding,AC-2 - cont'd,Desc,Identification & Authentication,"Process is manual.",2 - Repeatable but Intuitive,,,,,,,,Yes,,,Y\nSystem Documentation - System Inventory,GTS-SD-2,Desc,Technology Development & Acquisition,"Inventory is maintained.",3 - Defined Process,,,,,,,,Yes,,,Y`,
+                "A2S-CCF Control List.csv": `Control,Control Name,Control Description,Control Domain,Comments,Control Maturity,Inherent Impact,Inherent Likelihood,Residual Impact,Residual Likelihood,Residual Risk Rating,Control Help,Control Maturity Rating Help,In-Scope,Anti-piracy Flag,Ransomware Flag,AI Flag\n,,System Name,A2S,,,,,,,,,,,,,\n,,Market (HE/K-12/Skills/Gale),HE,,,,,,,,,,,,,\nAccount Management - Onboarding,AC-2,Desc,Identification & Authentication,"A2S is OIDC integrated and uses Okta (CIAM) for authentication flows.",5 - Optimized,,,,,,,,Yes,,,Y\nSystem Documentation - Boundary Diagram,GTS-SD-1,Desc,Technology Development & Acquisition,"Diagrams are on a wiki.",3 - Defined Process,,,,,,,,Yes,,,Y\nSystem Documentation - System Inventory,GTS-SD-2,Desc,Technology Development & Acquisition,"Relies on Bonsai.",2 - Repeatable but Intuitive,,,,,,,,Yes,,,Y`,
+                "Alfred-CCF Control List.csv": `Control,Control Name,Control Description,Control Domain,Comments,Control Maturity,Inherent Impact,Inherent Likelihood,Residual Impact,Residual Likelihood,Residual Risk Rating,Control Help,Control Maturity Rating Help,In-Scope,Anti-piracy Flag,Ransomware Flag,AI Flag\n,,System Name,Alfred,,,,,,,,,,,,,\n,,Market (HE/K-12/Skills/Gale),All markets,,,,,,,,,,,,,\nAccount Management - Onboarding,AC-2,Desc,Identification & Authentication,"Alfred is the login page...",3 - Defined Process,,,,,,,,Yes,,,Y\nRemote Access,AC-17,Desc,Network Security,"VPN access is required.",4 - Managed and Measurable,,,,,,,,Yes,,,Y`,
+                "Cengage Reader-CCF Control List.csv": `Control,Control Name,Control Description,Control Domain,Comments,Control Maturity,Inherent Impact,Inherent Likelihood,Residual Impact,Residual Likelihood,Residual Risk Rating,Control Help,Control Maturity Rating Help,In-Scope,Anti-piracy Flag,Ransomware Flag,AI Flag\n,,System Name,Cengage Reader,,,,,,,,,,,,,\n,,Market (HE/K-12/Skills/Gale),All markets,,,,,,,,,,,,,\nAccount Management - Onboarding,AC-2,Desc,Identification & Authentication,"Gutenberg's access is managed by Cengage...",3 - Defined Process,,,,,,,,Yes,,,Y\nSystem Documentation - System Inventory,GTS-SD-2,Desc,Technology Development & Acquisition,"Formal inventory is not maintained.",3 - Defined Process,,,,,,,,Yes,,,Y`,
+                "CNOW-CCF Control List.csv": `Control,Control Name,Control Description,Control Domain,Comments,Control Maturity,Inherent Impact,Inherent Likelihood,Residual Impact,Residual Likelihood,Residual Risk Rating,Control Help,Control Maturity Rating Help,In-Scope,Anti-piracy Flag,Ransomware Flag,AI Flag\n,,System Name,CNOW,,,,,,,,,,,,,\n,,Market (HE/K-12/Skills/Gale),HE,,,,,,,,,,,,,\nAccount Management - Onboarding,AC-2,Desc,Identification & Authentication,"Internal accounts are requested via ticketing system.",4 - Managed and Measurable,,,,,,,,Yes,,,Y\nSystem Documentation - Data Inventory,GTS-SD-3,Desc,Technology Development & Acquisition,"No data dictionary.",0 - Non-Existent,,,,,,,,Yes,,,Y`,
+                "CoursewareFB-CCF Control List.csv": `Control,Control Name,Control Description,Control Domain,Comments,Control Maturity,Inherent Impact,Inherent Likelihood,Residual Impact,Residual Likelihood,Residual Risk Rating,Control Help,Control Maturity Rating Help,In-Scope,Anti-piracy Flag,Ransomware Flag,AI Flag\n,,System Name,CoursewareFB,,,,,,,,,,,,,\n,,Market (HE/K-12/Skills/Gale),HE,,,,,,,,,,,,,\nAccount Management - Onboarding,AC-2,Desc,Identification & Authentication,"Access to appropriate slack channels...",3 - Defined Process,,,,,,,,Yes,,,\nSystem Documentation - Boundary Diagram,GTS-SD-1,Desc,Technology Development & Acquisition,"N/A",N/A,,,,,,,,Yes,,,`,
+                "CXP-CCF Control List.csv": `Control,Control Name,Control Description,Control Domain,Comments,Control Maturity,Inherent Impact,Inherent Likelihood,Residual Impact,Residual Likelihood,Residual Risk Rating,Control Help,Control Maturity Rating Help,In-Scope,Anti-piracy Flag,Ransomware Flag,AI Flag\n,,System Name,CXP,,,,,,,,,,,,,\n,,Market (HE/K-12/Skills/Gale),All markets,,,,,,,,,,,,,\nAccount Management - Onboarding,AC-2,Desc,Identification & Authentication,"Customer access relies on the applications that use the system...",4 - Managed and Measurable,,,,,,,,Yes,,,Y\nSystem Documentation - System Inventory,GTS-SD-2,Desc,Technology Development & Acquisition,"Wiki pages include dependencies.",3 - Defined Process,,,,,,,,Yes,,,Y`,
+                "CCF Control List.csv": `Control,Control Name,Control Description,Control Domain,Comments,Control Maturity,Inherent Impact,Inherent Likelihood,Residual Impact,Residual Likelihood,Residual Risk Rating,Control Help,Control Maturity Rating Help,In-Scope,Anti-piracy Flag,Ransomware Flag,AI Flag\n,,System Name,Delmar,,,,,,,,,,,,,\n,,Market (HE/K-12/Skills/Gale),Skills,,,,,,,,,,,,,\nAccount Management - Onboarding,AC-2,Desc,Identification & Authentication,"Students and instructors login through the Okta CIAM instance.",4 - Managed and Measurable,,,,,,,,Yes,,,Y\nINFORMATION SYSTEM MONITORING,SI-4,Desc,Continuous Monitoring,"Monitoring is in place.",5 - Optimized,,,,,,,,Yes,,,Y`,
+                "ESaaS-CCF Control List.csv": `Control,Control Name,Control Description,Control Domain,Comments,Control Maturity,Inherent Impact,Inherent Likelihood,Residual Impact,Residual Likelihood,Residual Risk Rating,Control Help,Control Maturity Rating Help,In-Scope,Anti-piracy Flag,Ransomware Flag,AI Flag\n,,System Name,ESaaS,,,,,,,,,,,,,\n,,Market (HE/K-12/Skills/Gale),All markets,,,,,,,,,,,,,\nAccount Management - Onboarding,AC-2,Desc,Identification & Authentication,"ESaaS is located behind Cengage platforms.",N/A,,,,,,,,Yes,,,Y\nSystem Documentation - System Inventory,GTS-SD-2,Desc,Technology Development & Acquisition,"Links to environments are maintained.",2 - Repeatable but Intuitive,,,,,,,,Yes,,,Y`,
+                "GaleTextTrans-CCF Control List.csv": `Control,Control Name,Control Description,Control Domain,Comments,Control Maturity,Inherent Impact,Inherent Likelihood,Residual Impact,Residual Likelihood,Residual Risk Rating,Control Help,Control Maturity Rating Help,In-Scope,Anti-piracy Flag,Ransomware Flag,AI Flag\n,,System Name,GaleTextTrans,,,,,,,,,,,,,\n,,Market (HE/K-12/Skills/Gale),Gale,,,,,,,,,,,,,\nAccount Management - Onboarding,AC-2,Desc,Identification & Authentication,"Contractors hired to help with access.",4 - Managed and Measurable,,,,,,,,Yes,,,Y\nSystem Documentation - System Inventory,GTS-SD-2,Desc,Technology Development & Acquisition,"To be created.",3 - Defined Process,,,,,,,,Yes,,,Y`,
+                "Gateway-CCF Control List.csv": `Control,Control Name,Control Description,Control Domain,Comments,Control Maturity,Inherent Impact,Inherent Likelihood,Residual Impact,Residual Likelihood,Residual Risk Rating,Control Help,Control Maturity Rating Help,In-Scope,Anti-piracy Flag,Ransomware Flag,AI Flag\n,,System Name,Gateway,,,,,,,,,,,,,\n,,Market (HE/K-12/Skills/Gale),All markets,,,,,,,,,,,,,\nAccount Management - Onboarding,AC-2,Desc,Identification & Authentication,"Cengage accounts and access to databases...",5 - Optimized,,,,,,,,Yes,,,Y\nSystem Documentation - System Inventory,GTS-SD-2,Desc,Technology Development & Acquisition,"Wiz contains accurate list.",4 - Managed and Measurable,,,,,,,,Yes,,,Y`,
+                "MindTap-CCF Control List.csv": `Control,Control Name,Control Description,Control Domain,Comments,Control Maturity,Inherent Impact,Inherent Likelihood,Residual Impact,Residual Likelihood,Residual Risk Rating,Control Help,Control Maturity Rating Help,In-Scope,Anti-piracy Flag,Ransomware Flag,AI Flag\n,,System Name,MindTap,,,,,,,,,,,,,\n,,Market (HE/K-12/Skills/Gale),HE,,,,,,,,,,,,,\nAccount Management - Onboarding,AC-2,Desc,Identification & Authentication,"Internal accounts are requested via ticketing system.",5 - Optimized,,,,,,,,Yes,,,Y\nSystem Documentation - Data Inventory,GTS-SD-3,Desc,Technology Development & Acquisition,"Maintains a data dictionary.",3 - Defined Process,,,,,,,,Yes,,,Y`,
+                "MindTapSchool-CCF Control List.csv": `Control,Control Name,Control Description,Control Domain,Comments,Control Maturity,Inherent Impact,Inherent Likelihood,Residual Impact,Residual Likelihood,Residual Risk Rating,Control Help,Control Maturity Rating Help,In-Scope,Anti-piracy Flag,Ransomware Flag,AI Flag\n,,System Name,MindTapSchool,,,,,,,,,,,,,\n,,Market (HE/K-12/Skills/Gale),K-12,,,,,,,,,,,,,\nAccount Management - Onboarding,AC-2,Desc,Identification & Authentication,"Internal accounts are requested via ticketing system.",5 - Optimized,,,,,,,,Yes,,,Y\nSystem Documentation - System Inventory,GTS-SD-2,Desc,Technology Development & Acquisition,"Inventory for TX-RAMP.",3 - Defined Process,,,,,,,,Yes,,,Y`,
+                "NGLSync-CCF Control List.csv": `Control,Control Name,Control Description,Control Domain,Comments,Control Maturity,Inherent Impact,Inherent Likelihood,Residual Impact,Residual Likelihood,Residual Risk Rating,Control Help,Control Maturity Rating Help,In-Scope,Anti-piracy Flag,Ransomware Flag,AI Flag\n,,System Name,NGLSync,,,,,,,,,,,,,\n,,Market (HE/K-12/Skills/Gale),K-12,,,,,,,,,,,,,\nAccount Management - Onboarding,AC-2,Desc,Identification & Authentication,"Integrate with MTS, MT, CNOW, WA, etc.",5 - Optimized,,,,,,,,Yes,,,Y\nSystem Documentation - Boundary Diagram,GTS-SD-1,Desc,Technology Development & Acquisition,"Documentation was lost.",2 - Repeatable but Intuitive,,,,,,,,Yes,,,Y`,
+                "OWL-CCF Control List.csv": `Control,Control Name,Control Description,Control Domain,Comments,Control Maturity,Inherent Impact,Inherent Likelihood,Residual Impact,Residual Likelihood,Residual Risk Rating,Control Help,Control Maturity Rating Help,In-Scope,Anti-piracy Flag,Ransomware Flag,AI Flag\n,,System Name,OWL,,,,,,,,,,,,,\n,,Market (HE/K-12/Skills/Gale),HE,,,,,,,,,,,,,\nAccount Management - Onboarding,AC-2,Desc,Identification & Authentication,"Internal accounts are requested via ticketing system.",4 - Managed and Measurable,,,,,,,,Yes,,,Y\nSystem Documentation - Data Inventory,GTS-SD-3,Desc,Technology Development & Acquisition,"Not required to maintain.",0 - Non-Existent,,,,,,,,Yes,,,Y`,
+                "RDS Backup-CCF Control List.csv": `Control,Control Name,Control Description,Control Domain,Comments,Control Maturity,Inherent Impact,Inherent Likelihood,Residual Impact,Residual Likelihood,Residual Risk Rating,Control Help,Control Maturity Rating Help,In-Scope,Anti-piracy Flag,Ransomware Flag,AI Flag\n,,System Name,RDS Backup,,,,,,,,,,,,,\n,,Market (HE/K-12/Skills/Gale),All markets,,,,,,,,,,,,,\nAccount Management - Onboarding,AC-2,Desc,Identification & Authentication,"Access to appropriate slack channels...",3 - Defined Process,,,,,,,,Yes,,,\nEnd User Computing - Spreadsheet Backups,GTS-EUC-3,Desc,Business Continuity & Disaster Recovery,"Backups are performed.",3 - Defined Process,,,,,,,,No,,,`,
+                "SAM-CCF Control List.csv": `Control,Control Name,Control Description,Control Domain,Comments,Control Maturity,Inherent Impact,Inherent Likelihood,Residual Impact,Residual Likelihood,Residual Risk Rating,Control Help,Control Maturity Rating Help,In-Scope,Anti-piracy Flag,Ransomware Flag,AI Flag\n,,System Name,SAM,,,,,,,,,,,,,\n,,Market (HE/K-12/Skills/Gale),HE,,,,,,,,,,,,,\nAccount Management - Onboarding,AC-2,Desc,Identification & Authentication,"Internal accounts are requested via ticketing system...",5 - Optimized,,,,,,,,Yes,,,Y\nSystem Documentation - Data Inventory,GTS-SD-3,Desc,Technology Development & Acquisition,"Tracks what data is collected.",3 - Defined Process,,,,,,,,Yes,,,Y`,
+                "WebAssign-CCF Control List.csv": `Control,Control Name,Control Description,Control Domain,Comments,Control Maturity,Inherent Impact,Inherent Likelihood,Residual Impact,Residual Likelihood,Residual Risk Rating,Control Help,Control Maturity Rating Help,In-Scope,Anti-piracy Flag,Ransomware Flag,AI Flag\n,,System Name,WebAssign,,,,,,,,,,,,,\n,,Market (HE/K-12/Skills/Gale),HE,,,,,,,,,,,,,\nAccount Management - Onboarding,AC-2,Desc,Identification & Authentication,"Internal accounts are requested via ticketing system.",4 - Managed and Measurable,,,,,,,,Yes,,,Y\nSystem Documentation - Boundary Diagram,GTS-SD-1,Desc,Technology Development & Acquisition,"TX-RAMP compliance.",3 - Defined Process,,,,,,,,Yes,,,Y`
+            };
+            
+            let allSystemsData = [];
+            let chart;
+
+            // --- UI Elements ---
+            const marketFilter = document.getElementById('market-filter');
+            const systemFilter = document.getElementById('system-filter');
+            const controlFilter = document.getElementById('control-filter');
+            const maturityFilter = document.getElementById('maturity-filter');
+            const systemList = document.getElementById('system-list');
+            const dashboardView = document.getElementById('dashboard-view');
+            const detailView = document.getElementById('detail-view');
+            const backToDashboardBtn = document.getElementById('back-to-dashboard');
+            const sidebar = document.getElementById('sidebar');
+            const openSidebarBtn = document.getElementById('open-sidebar');
+            const closeSidebarBtn = document.getElementById('close-sidebar');
+
+            // --- Functions ---
+            
+            const parseCSV = (csvText) => {
+                const lines = csvText.trim().split('\n');
+                const header = lines[0].split(',');
+                const data = [];
+                for (let i = 1; i < lines.length; i++) {
+                    const values = lines[i].split(',');
+                    if (values.length > 1) {
+                        let obj = {};
+                        for (let j = 0; j < header.length; j++) {
+                            obj[header[j].trim()] = values[j] ? values[j].trim() : '';
+                        }
+                        data.push(obj);
+                    }
+                }
+                return data;
+            };
+
+            const extractMetadata = (parsedData) => {
+                let systemName = 'Unknown';
+                let market = 'Unknown';
+                parsedData.forEach(row => {
+                    if (row['Control'] === '' && row['Control Name'] === '' && row['Control Description'] === 'System Name') {
+                        systemName = row['Control Domain'];
+                    }
+                    if (row['Control'] === '' && row['Control Name'] === '' && row['Control Description'].startsWith('Market')) {
+                        market = row['Control Domain'].trim();
+                        // Standardize market data
+                        if (market.toLowerCase() === 'all markets') {
+                            market = 'All Markets';
+                        }
+                    }
+                });
+                return { systemName, market };
+            };
+
+            const getMaturityGroup = (maturityStr) => {
+                if (!maturityStr || maturityStr === 'N/A' || maturityStr.trim() === '') return null;
+                const maturityValue = parseInt(maturityStr.split(' ')[0], 10);
+                if (isNaN(maturityValue)) return null;
+
+                if (maturityValue <= 2) return 'Levels 0-2 (Initial)';
+                if (maturityValue === 3) return 'Level 3 (Defined)';
+                if (maturityValue === 4) return 'Level 4 (Managed)';
+                if (maturityValue === 5) return 'Level 5 (Optimized)';
+                return null;
+            };
+
+            const initialize = () => {
+                const markets = new Set();
+                const systems = new Set();
+                const controlNames = new Set();
+
+                for (const fileName in fileData) {
+                    const parsed = parseCSV(fileData[fileName]);
+                    const metadata = extractMetadata(parsed);
+                    
+                    if (metadata.systemName === 'Unknown') {
+                        console.warn(`Could not determine system name for ${fileName}`);
+                        continue;
+                    }
+                    
+                    const controls = parsed.filter(row => row['Control'] && row['Control Domain']);
+                    
+                    controls.forEach(c => {
+                        if(c['Control Name']) controlNames.add(c['Control Name']);
+                    });
+
+                    allSystemsData.push({
+                        id: metadata.systemName.toLowerCase().replace(/\s/g, '-'),
+                        name: metadata.systemName,
+                        market: metadata.market,
+                        controls: controls
+                    });
+                    markets.add(metadata.market);
+                    systems.add(metadata.systemName);
+                }
+
+                allSystemsData.sort((a, b) => a.name.localeCompare(b.name));
+                
+                populateFilter(marketFilter, Array.from(markets).sort());
+                populateFilter(systemFilter, Array.from(systems).sort());
+                populateFilter(controlFilter, Array.from(controlNames).sort());
+
+                updateDashboard(allSystemsData);
+                renderSystemList(allSystemsData);
+
+                marketFilter.addEventListener('change', applyFilters);
+                systemFilter.addEventListener('change', applyFilters);
+                controlFilter.addEventListener('change', applyFilters);
+                maturityFilter.addEventListener('change', applyFilters);
+                backToDashboardBtn.addEventListener('click', showDashboardView);
+                openSidebarBtn.addEventListener('click', () => sidebar.classList.add('open'));
+                closeSidebarBtn.addEventListener('click', () => sidebar.classList.remove('open'));
+            };
+
+            const populateFilter = (selectElement, options) => {
+                 options.forEach(optionText => {
+                    const option = document.createElement('option');
+                    option.textContent = optionText;
+                    selectElement.appendChild(option);
+                });
+            };
+
+            const applyFilters = () => {
+                const selectedMarket = marketFilter.value;
+                const selectedSystem = systemFilter.value;
+                const selectedControl = controlFilter.value;
+                const selectedMaturity = maturityFilter.value;
+
+                let filteredSystems = allSystemsData;
+
+                if (selectedMarket !== 'All Markets') {
+                    filteredSystems = filteredSystems.filter(sys => sys.market === selectedMarket);
+                }
+                if (selectedSystem !== 'All Systems') {
+                    filteredSystems = filteredSystems.filter(sys => sys.name === selectedSystem);
+                }
+                
+                let dashboardData = JSON.parse(JSON.stringify(filteredSystems));
+
+                if (selectedControl !== 'All Controls') {
+                     dashboardData.forEach(system => {
+                        system.controls = system.controls.filter(control => control['Control Name'] === selectedControl);
+                    });
+                }
+                
+                if (selectedMaturity !== 'All Maturities') {
+                     dashboardData.forEach(system => {
+                        system.controls = system.controls.filter(control => getMaturityGroup(control['Control Maturity']) === selectedMaturity);
+                    });
+                }
+
+                dashboardData = dashboardData.filter(system => system.controls.length > 0);
+                
+                updateDashboard(dashboardData);
+                renderSystemList(filteredSystems);
+            };
+
+            const updateDashboard = (data) => {
+                document.getElementById('total-systems').textContent = data.length;
+
+                let totalMaturity = 0;
+                let maturityCount = 0;
+                let aiFlaggedCount = 0;
+                let naCount = 0;
+                
+                const allControls = [];
+
+                data.forEach(system => {
+                    system.controls.forEach(control => {
+                        const maturityStr = control['Control Maturity'];
+                        
+                        if (!maturityStr || maturityStr === 'N/A' || maturityStr.trim() === '') {
+                            naCount++;
+                            return; 
+                        }
+                        
+                        allControls.push(control);
+
+                        const maturityValue = parseInt(maturityStr.split(' ')[0]);
+                        if (!isNaN(maturityValue)) {
+                            totalMaturity += maturityValue;
+                            maturityCount++;
+                        }
+                        
+                        if (control['AI Flag'] === 'Y') {
+                            aiFlaggedCount++;
+                        }
+                    });
+                });
+
+                const avgMaturity = maturityCount > 0 ? (totalMaturity / maturityCount).toFixed(1) : '0.0';
+                document.getElementById('avg-maturity').textContent = avgMaturity;
+                document.getElementById('ai-flagged').textContent = aiFlaggedCount;
+                document.getElementById('na-controls').textContent = naCount;
+
+                updateMaturityChart(data);
+            };
+
+            const updateMaturityChart = (systemsData) => {
+                const ctx = document.getElementById('maturityChart').getContext('2d');
+                
+                const allControls = systemsData.flatMap(s => s.controls);
+                const yCategories = [...new Set(allControls.map(c => c['Control Name']))].sort();
+                const xCategories = ['Levels 0-2 (Initial)', 'Level 3 (Defined)', 'Level 4 (Managed)', 'Level 5 (Optimized)'];
+
+                const dataMap = new Map();
+
+                systemsData.forEach(system => {
+                    system.controls.forEach(control => {
+                        const group = getMaturityGroup(control['Control Maturity']);
+                        const controlName = control['Control Name'];
+                        if (!group || !controlName) return;
+
+                        const key = `${group}|${controlName}`;
+                        if (!dataMap.has(key)) {
+                            dataMap.set(key, { systems: [] });
+                        }
+                        dataMap.get(key).systems.push(system.name);
+                    });
+                });
+                
+                const chartData = [];
+                dataMap.forEach((value, key) => {
+                    const [group, controlName] = key.split('|');
+                    const count = value.systems.length;
+                    chartData.push({
+                        x: group,
+                        y: controlName,
+                        r: count * 4 + 4,
+                        systems: value.systems.sort()
+                    });
+                });
+
+                if (chart) {
+                    chart.destroy();
+                }
+                
+                chart = new Chart(ctx, {
+                    type: 'bubble',
+                    data: {
+                        datasets: [{
+                            label: 'Control Counts',
+                            data: chartData,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const dataPoint = context.raw;
+                                        const count = dataPoint.systems.length;
+                                        const controlName = dataPoint.y;
+                                        
+                                        let lines = [];
+                                        lines.push(`${controlName}: ${count} system(s)`);
+                                        lines.push('--------------------');
+                                        lines.push(...dataPoint.systems);
+                                        return lines;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                type: 'category',
+                                labels: xCategories,
+                                grid: {
+                                    display: false
+                                }
+                            },
+                            y: {
+                                type: 'category',
+                                labels: yCategories
+                            }
+                        }
+                    }
+                });
+            };
+
+            const renderSystemList = (systems) => {
+                systemList.innerHTML = '';
+                systems.forEach(system => {
+                    const li = document.createElement('li');
+                    const button = document.createElement('button');
+                    button.textContent = system.name;
+                    button.className = 'w-full text-left px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-blue-50 focus:outline-none focus:bg-blue-100';
+                    button.onclick = () => showDetailView(system.id);
+                    li.appendChild(button);
+                    systemList.appendChild(li);
+                });
+            };
+
+            const showDetailView = (systemId) => {
+                const system = allSystemsData.find(s => s.id === systemId);
+                if (!system) return;
+
+                document.getElementById('detail-system-name').textContent = system.name;
+                document.getElementById('detail-system-market').textContent = system.market;
+                
+                const controlListBody = document.getElementById('detail-control-list');
+                controlListBody.innerHTML = '';
+
+                system.controls.forEach(control => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${control['Control Name']}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${control['Control Domain']}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${control['Control Maturity']}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">${control['Comments']}</td>
+                    `;
+                    controlListBody.appendChild(row);
+                });
+
+                dashboardView.classList.add('hidden');
+                detailView.classList.remove('hidden');
+                if (window.innerWidth < 768) {
+                    sidebar.classList.remove('open');
+                }
+            };
+
+            const showDashboardView = () => {
+                detailView.classList.add('hidden');
+                dashboardView.classList.remove('hidden');
+            };
+
+            initialize();
+        });
+    </script>
+</body>
+</html>
+

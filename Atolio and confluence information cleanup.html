@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>From Chaos to Clarity: Our Knowledge Vision</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #334155; /* slate-700 */
+        }
+        .section-title {
+            font-size: 2.25rem; /* text-4xl */
+            font-weight: 800; /* font-extrabold */
+            color: #1e293b; /* slate-800 */
+            letter-spacing: -0.025em;
+        }
+        .section-subtitle {
+            font-size: 1.25rem; /* text-xl */
+            color: #475569; /* slate-600 */
+            max-width: 48rem; /* max-w-3xl */
+            margin: 1rem auto 0;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        /* For the workflow diagram */
+        .workflow-step {
+            position: relative;
+            padding-left: 2.5rem; /* pl-10 */
+            padding-bottom: 2.5rem; /* pb-10 */
+        }
+        .workflow-step:not(:last-child) {
+            border-left: 2px solid #cbd5e1; /* border-slate-300 */
+        }
+        .workflow-step::before {
+            content: '';
+            position: absolute;
+            left: -0.7rem;
+            top: 0;
+            width: 1.25rem; /* w-5 */
+            height: 1.25rem; /* h-5 */
+            border-radius: 9999px; /* rounded-full */
+            background-color: #ffffff; /* bg-white */
+            border: 2px solid #0ea5e9; /* border-sky-500 */
+        }
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hero Section -->
+    <header class="bg-slate-800 text-white text-center py-20 px-4">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight">From Chaos to Clarity</h1>
+            <p class="mt-4 text-xl md:text-2xl text-slate-300">A new vision for harnessing our collective knowledge to work smarter and innovate faster.</p>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 py-16 space-y-24">
+
+        <!-- The Problem Section -->
+        <section id="problem" class="text-center fade-in">
+            <h2 class="section-title">Our Reality Today: A Maze of Information</h2>
+            <p class="section-subtitle">We have decades of valuable knowledge, but it's scattered across dozens of systems. Finding the right answer feels like searching for a needle in a haystack, slowing us down and leading to "tribal knowledge."</p>
+            <div class="mt-12 card p-8">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm font-semibold text-slate-600">
+                    <div class="p-3 bg-slate-100 rounded-lg">Emails & Chats</div>
+                    <div class="p-3 bg-slate-100 rounded-lg">SharePoint Sites</div>
+                    <div class="p-3 bg-slate-100 rounded-lg">Network Drives</div>
+                    <div class="p-3 bg-slate-100 rounded-lg">MS Teams</div>
+                    <div class="p-3 bg-slate-100 rounded-lg">Salesforce</div>
+                    <div class="p-3 bg-slate-100 rounded-lg">ServiceNow</div>
+                    <div class="p-3 bg-slate-100 rounded-lg">SAP</div>
+                    <div class="p-3 bg-slate-100 rounded-lg">And more...</div>
+                </div>
+                <div class="my-6 text-5xl text-slate-300">↓</div>
+                <div class="flex items-center justify-center p-6 bg-red-100 text-red-800 rounded-lg">
+                    <svg class="w-10 h-10 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span class="text-xl font-bold">"Where do I even start looking?"</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Solution Section -->
+        <section id="solution" class="text-center fade-in">
+            <h2 class="section-title">A New Partnership for Knowledge</h2>
+            <p class="section-subtitle">We're not just adding another tool. We're creating a powerful ecosystem with two core partners, each with a specific job to do.</p>
+            <div class="mt-12 grid md:grid-cols-2 gap-8 text-left">
+                <div class="card p-8">
+                    <div class="inline-block bg-sky-100 text-sky-800 p-3 rounded-lg">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mt-4 text-slate-800">The Discovery Engine: Atolio</h3>
+                    <p class="mt-2 text-slate-600">This is your **intelligent starting point**. Atolio connects to all our systems, using AI to find the most relevant information, no matter where it's hidden. It's the powerful search that understands our chaos.</p>
+                </div>
+                <div class="card p-8">
+                    <div class="inline-block bg-green-100 text-green-800 p-3 rounded-lg">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mt-4 text-slate-800">The Curated Library: Confluence</h3>
+                    <p class="mt-2 text-slate-600">This is our **single source of truth**. Confluence is the permanent, organized home for our most valuable knowledge—project plans, best practices, official documentation, and meeting notes.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Workflow Section -->
+        <section id="workflow" class="fade-in">
+            <div class="text-center">
+                <h2 class="section-title">How It Works: From Discovery to Curation</h2>
+                <p class="section-subtitle">This isn't a massive cleanup project. It's a simple, continuous cycle of improvement that everyone can participate in, driven by our real-world needs.</p>
+            </div>
+            <div class="mt-12 card p-8 md:p-12">
+                <div class="max-w-2xl mx-auto">
+                    <div class="workflow-step">
+                        <h4 class="font-bold text-sky-600 text-xl">1. Ask Atolio</h4>
+                        <p class="mt-1 text-slate-600">Start every search in Atolio. Ask a natural question, just like you would in Google.</p>
+                    </div>
+                    <div class="workflow-step">
+                        <h4 class="font-bold text-sky-600 text-xl">2. Find the Answer</h4>
+                        <p class="mt-1 text-slate-600">Atolio searches everywhere and finds the answer, even if it's buried in an old Teams chat or a forgotten SharePoint site. You get your answer fast.</p>
+                    </div>
+                    <div class="workflow-step">
+                        <h4 class="font-bold text-green-600 text-xl">3. Recognize Value</h4>
+                        <p class="mt-1 text-slate-600">You realize this information is valuable and shouldn't be so hard to find again. This is the "curation trigger."</p>
+                    </div>
+                    <div class="workflow-step">
+                        <h4 class="font-bold text-green-600 text-xl">4. Curate in Confluence</h4>
+                        <p class="mt-1 text-slate-600">Take 5 minutes to capture that knowledge. Create a clean, simple page in our Confluence library with a clear title. You've just turned tribal knowledge into a permanent asset.</p>
+                    </div>
+                    <div class="workflow-step">
+                        <h4 class="font-bold text-slate-800 text-xl">5. The System Improves</h4>
+                        <p class="mt-1 text-slate-600">The next time someone searches, Atolio's AI will recognize the new, authoritative Confluence page and rank it as the top result. The entire system gets smarter because of you.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Benefits Section -->
+        <section id="benefits" class="text-center fade-in">
+            <h2 class="section-title">Why This Matters</h2>
+            <p class="section-subtitle">This is more than a new process. It's a cultural shift that will fundamentally change how we work for the better.</p>
+            <div class="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="card p-6">
+                    <h3 class="font-bold text-lg">Work Smarter</h3>
+                    <p class="text-sm text-slate-600 mt-1">Spend less time searching and more time executing.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-lg">Onboard Faster</h3>
+                    <p class="text-sm text-slate-600 mt-1">Give new hires the ability to find answers on day one.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-lg">Preserve Knowledge</h3>
+                    <p class="text-sm text-slate-600 mt-1">Protect our intellectual property when employees leave.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-lg">Drive Innovation</h3>
+                    <p class="text-sm text-slate-600 mt-1">Easily find experts and past project learnings to build on.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to Action -->
+        <footer class="text-center bg-slate-800 text-white rounded-lg py-16 px-4 fade-in">
+            <h2 class="text-4xl font-extrabold">Your Role in This Journey</h2>
+            <p class="mt-4 max-w-2xl mx-auto text-slate-300">Building a smarter company requires all of us. Your contribution is simple but powerful:</p>
+            <div class="mt-8 text-xl font-semibold bg-sky-500 inline-block p-4 rounded-lg">
+                Start with Atolio. When you find gold, add it to our library.
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+
+            document.querySelectorAll('.fade-in').forEach((el) => {
+                observer.observe(el);
+            });
+        });
+    </script>
+
+</body>
+</html>

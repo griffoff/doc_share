@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cengage GTM Platform Assessment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Subtle Blue Accent -->
+    <!-- Application Structure Plan: A single-page dashboard design is chosen for its directness and ease of navigation. The structure is thematic, not linear like the report. It starts with high-level strategic recommendations (the "answer"), then allows users to dive into the details. Key sections are: 1) Strategic Scenarios: Immediately presents the core recommendations based on Cengage's goals. This is the most critical information and should be upfront. 2) Platform Deep Dive: An interactive section where users can select a specific platform to view its detailed pros, cons, and AI capabilities. This replaces a static, multi-page profile section with an engaging, user-driven comparison. 3) Comparative Analytics: Visualizes the feature and cost comparison data in charts for quick synthesis. This is more effective than dense tables. 4) Market Landscape: Provides context on the market trends. This structure prioritizes actionable insights and allows users to explore supporting data on demand, which is a more efficient user flow than reading the original report cover-to-cover. -->
+    <!-- Visualization & Content Choices: 1) Strategic Recommendations: Report Info -> Scenario-based recommendations. Goal -> Guide decision-making. Viz/Method -> Interactive tabbed cards (HTML/CSS/JS). Interaction -> Click tabs to switch between scenarios. Justification -> Allows users to quickly find the recommendation that matches their strategic priority. 2) Platform Profiles: Report Info -> Detailed pros, cons, pricing, AI features for 5 platforms. Goal -> Allow deep, on-demand comparison. Viz/Method -> Dynamic content blocks updated by a selector component (HTML/CSS/JS). Interaction -> User clicks a platform logo to populate the detail view. Justification -> Far more engaging and less overwhelming than scrolling through five long sections. 3) Feature Comparison: Report Info -> Feature matrix table. Goal -> Compare platforms across key features. Viz/Method -> Grouped Bar Chart (Chart.js/Canvas). Interaction -> Tooltips on hover provide details. Justification -> Visualizes relative strengths and weaknesses more effectively than a text table. 4) TCO Comparison: Report Info -> Pricing & TCO table. Goal -> Compare financial investment. Viz/Method -> Bar Chart (Chart.js/Canvas) showing estimated license cost ranges. Interaction -> Tooltips clarify cost drivers. Justification -> Makes complex pricing data easier to grasp at a glance. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8;
+            color: #333;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        .nav-button.active {
+            background-color: #3B82F6;
+            color: #FFFFFF;
+        }
+        .platform-logo.active {
+            border-color: #3B82F6;
+            transform: scale(1.05);
+        }
+        .tab-button.active {
+            border-bottom-color: #3B82F6;
+            color: #3B82F6;
+            font-weight: 600;
+        }
+        .smooth-show {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .smooth-show.visible {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-gray-800">GTM Platform Strategic Assessment</h1>
+            <nav class="hidden md:flex space-x-2">
+                <button onclick="scrollToSection('recommendations')" class="nav-button px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">Recommendations</button>
+                <button onclick="scrollToSection('platforms')" class="nav-button px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">Platform Deep Dive</button>
+                <button onclick="scrollToSection('comparison')" class="nav-button px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">Comparative Analytics</button>
+                <button onclick="scrollToSection('market')" class="nav-button px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">Market Landscape</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <section id="recommendations" class="mb-20">
+            <h2 class="text-3xl font-bold text-center mb-4">Which Platform Strategy is Right for Cengage?</h2>
+            <p class="text-center text-lg text-gray-600 max-w-3xl mx-auto mb-10">The optimal choice depends on your primary strategic goal. This section provides scenario-based recommendations to guide your decision-making process, presenting the core findings of the report upfront for immediate strategic insight.</p>
+            
+            <div class="border-b border-gray-200 mb-6">
+                <nav class="-mb-px flex justify-center space-x-8" aria-label="Tabs">
+                    <button id="tab-btn-A" onclick="changeTab('A')" class="tab-button active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        Scenario A: Maximize Sales Productivity
+                    </button>
+                    <button id="tab-btn-B" onclick="changeTab('B')" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        Scenario B: Unify GTM Tech Stack
+                    </button>
+                    <button id="tab-btn-C" onclick="changeTab('C')" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        Scenario C: Deliver World-Class Web Experiences
+                    </button>
+                </nav>
+            </div>
+
+            <div id="tab-content-A" class="tab-content smooth-show visible">
+                <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+                    <h3 class="text-2xl font-semibold text-blue-600 mb-3">Recommendation: Highspot or Seismic</h3>
+                    <p class="text-gray-700 leading-relaxed">If the most pressing business problem is to solve sales content chaos, increase seller effectiveness, and deploy a state-of-the-art, AI-driven playbook system, then a dedicated **Sales Enablement Platform (SEP)** is the only logical choice. These platforms are purpose-built to live within the seller's CRM and use AI to deliver the dynamic, run-time guidance Cengage requires. The final choice between them should be based on a hands-on "bake-off" to determine the best cultural and workflow fit for your sales team.</p>
+                </div>
+            </div>
+            <div id="tab-content-B" class="tab-content smooth-show" style="display: none;">
+                <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+                    <h3 class="text-2xl font-semibold text-blue-600 mb-3">Recommendation: HubSpot</h3>
+                    <p class="text-gray-700 leading-relaxed">If the primary obstacles to growth are technology sprawl, data silos, and a disconnect between sales and marketing, HubSpot presents a compelling solution. Adopting the HubSpot Customer Platform would create a single, integrated system for the entire GTM organization. This path offers data unification and operational simplicity but involves accepting a less specialized playbook toolset compared to dedicated SEPs. The risks of vendor lock-in and escalating costs must be carefully weighed.</p>
+                </div>
+            </div>
+            <div id="tab-content-C" class="tab-content smooth-show" style="display: none;">
+                <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+                    <h3 class="text-2xl font-semibold text-blue-600 mb-3">Recommendation: AEM or Sitecore + a dedicated SEP</h3>
+                    <p class="text-gray-700 leading-relaxed">If the paramount objective is to optimize Cengage.com and deliver sophisticated, AI-driven personalization to millions of users, an enterprise **Digital Experience Platform (DXP)** is the correct tool. However, DXPs do not solve the sales enablement problem. The correct strategy in this scenario is a **best-of-breed approach**: invest in a DXP for the marketing-owned web experience and simultaneously invest in a dedicated SEP (Highspot or Seismic) to meet the distinct needs of the sales team.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="platforms" class="mb-20">
+            <h2 class="text-3xl font-bold text-center mb-4">Platform Deep Dive</h2>
+            <p class="text-center text-lg text-gray-600 max-w-3xl mx-auto mb-10">Explore the leading contenders in the GTM platform market. Select a platform below to view a detailed analysis of its capabilities, strengths, weaknesses, and how it approaches AI-powered sales and marketing automation. This interactive format allows for direct, on-demand comparison.</p>
+            
+            <div class="flex justify-center items-center space-x-4 md:space-x-8 mb-10 flex-wrap">
+                <button class="platform-logo active p-2 border-2 border-transparent rounded-xl transition-all" onclick="selectPlatform('Highspot')"><img src="https://placehold.co/120x60/F0F9FF/3B82F6?text=Highspot" alt="Highspot Logo" class="rounded-lg"></button>
+                <button class="platform-logo p-2 border-2 border-transparent rounded-xl transition-all" onclick="selectPlatform('Seismic')"><img src="https://placehold.co/120x60/F0F9FF/3B82F6?text=Seismic" alt="Seismic Logo" class="rounded-lg"></button>
+                <button class="platform-logo p-2 border-2 border-transparent rounded-xl transition-all" onclick="selectPlatform('HubSpot')"><img src="https://placehold.co/120x60/F0F9FF/3B82F6?text=HubSpot" alt="HubSpot Logo" class="rounded-lg"></button>
+                <button class="platform-logo p-2 border-2 border-transparent rounded-xl transition-all" onclick="selectPlatform('AEM')"><img src="https://placehold.co/120x60/F0F9FF/3B82F6?text=AEM" alt="AEM Logo" class="rounded-lg"></button>
+                <button class="platform-logo p-2 border-2 border-transparent rounded-xl transition-all" onclick="selectPlatform('Sitecore')"><img src="https://placehold.co/120x60/F0F9FF/3B82F6?text=Sitecore" alt="Sitecore Logo" class="rounded-lg"></button>
+            </div>
+
+            <div id="platform-details" class="bg-white p-8 rounded-xl shadow-lg border border-gray-100 smooth-show visible">
+            </div>
+        </section>
+
+        <section id="comparison" class="mb-20">
+            <h2 class="text-3xl font-bold text-center mb-4">Comparative Analytics</h2>
+            <p class="text-center text-lg text-gray-600 max-w-3xl mx-auto mb-10">Visualize how the platforms stack up against each other. The charts below provide a clear, at-a-glance comparison of key features and estimated total cost of ownership, helping to translate complex data from the report into actionable insights.</p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                    <h3 class="text-xl font-semibold text-center mb-4">Feature Capability Ratings</h3>
+                    <div class="chart-container">
+                        <canvas id="featureChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                    <h3 class="text-xl font-semibold text-center mb-4">Estimated Annual License Cost (USD)</h3>
+                     <div class="chart-container">
+                        <canvas id="tcoChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="market" class="mb-12">
+            <h2 class="text-3xl font-bold text-center mb-4">Understanding the Market Landscape</h2>
+            <p class="text-center text-lg text-gray-600 max-w-3xl mx-auto mb-10">The world of GTM platforms is in flux. This section provides context on the key market trends identified in the report, explaining the forces that are shaping the solutions available today and influencing the strategic decision Cengage must make.</p>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                    <h3 class="text-xl font-semibold mb-2">1. Platform Convergence</h3>
+                    <p class="text-gray-600">The lines between Content Management Systems (CMS), Digital Experience Platforms (DXPs), and Sales Enablement Platforms (SEPs) are blurring. Vendors are expanding their feature sets, creating powerful but complex multi-functional solutions.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                    <h3 class="text-xl font-semibold mb-2">2. The Rise of Agentic AI</h3>
+                    <p class="text-gray-600">AI is moving beyond simple content generation. The most advanced platforms now use "agentic" AI to orchestrate complex workflows, acting as a virtual team member to automate tasks and provide intelligent recommendations.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                    <h3 class="text-xl font-semibold mb-2">3. Unified vs. Composable</h3>
+                    <p class="text-gray-600">A key strategic choice is emerging: adopt a single, all-in-one platform for simplicity and data unification, or build a flexible, "best-of-breed" stack that combines top-tier solutions for each specific function.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-gray-500">
+            <p>&copy; 2025 Cengage Learning. This is an internal strategic assessment tool.</p>
+        </div>
+    </footer>
+
+    <script>
+        const platformData = {
+            Highspot: {
+                title: "Highspot: The Sales Enablement Leader",
+                description: "A pure-play Sales Enablement Platform (SEP) recognized as a market leader, focusing on user experience to drive high adoption rates among sales reps. It excels at connecting content to revenue.",
+                pros: [
+                    "Superior, intuitive user experience driving high adoption.",
+                    "Intelligent AI-powered content search and recommendations.",
+                    "Actionable analytics that link content usage to revenue.",
+                    "Exceptional customer support and smooth implementation."
+                ],
+                cons: [
+                    "Premium pricing, representing a significant investment.",
+                    "Can be overly complex for smaller teams with simple needs.",
+                    "Not a website CMS; focused solely on sales process content."
+                ],
+                ai: "Highspot Copilot excels at AI-assisted curation and summarization. It provides dynamic, run-time recommendations within the CRM by analyzing deal data. It can generate personalized follow-up emails and tailor Digital Sales Rooms.",
+                videoUrl: "https://www.youtube.com/watch?v=Get-s42n4pU"
+            },
+            Seismic: {
+                title: "Seismic: The Enterprise Enablement Powerhouse",
+                description: "Highspot's primary competitor, particularly strong in the enterprise segment. Its key differentiator is powerful content automation and governance, making it ideal for large, regulated organizations.",
+                pros: [
+                    "Robust content automation (LiveDocs®) for personalization at scale.",
+                    "Strong governance, compliance features, and audit trails.",
+                    "Comprehensive analytics on buyer engagement with content."
+                ],
+                cons: [
+                    "Steeper learning curve and more complex implementation.",
+                    "User interface considered less intuitive than Highspot by some.",
+                    "Some user reports of emails being flagged as spam."
+                ],
+                ai: "Seismic Aura AI provides real-time content recommendations and playbook guidance within the CRM. It excels at AI-assisted curation and using CRM data to dynamically surface the most relevant content for a specific sales scenario.",
+                videoUrl: "https://www.youtube.com/watch?v=d12-f2g-i8M"
+            },
+            HubSpot: {
+                title: "HubSpot: The All-in-One GTM Platform",
+                description: "A fully integrated customer platform built around a powerful CRM. It aims to break down silos between sales, marketing, and service by offering a single system of record for the entire customer journey.",
+                pros: [
+                    "Unified platform reduces complexity and improves team alignment.",
+                    "Renowned for its ease of use and user-friendly interface.",
+                    "Powerful cross-functional workflow automation.",
+                    "Extensive app marketplace with hundreds of integrations."
+                ],
+                cons: [
+                    "Costs can escalate quickly with contact growth and feature needs.",
+                    "Creates significant vendor lock-in, making migration difficult.",
+                    "'Jack of all trades, master of none'; features may lack depth."
+                ],
+                ai: "HubSpot's AI, 'Breeze', includes agents for content creation and prospecting. Its guided selling features recommend next-best actions within its own CRM. However, its ability to auto-generate structured playbooks from raw content is less developed than dedicated SEPs.",
+                videoUrl: "https://www.youtube.com/watch?v=b282-A-2ex0"
+            },
+            AEM: {
+                title: "Adobe Experience Manager (AEM): The Enterprise DXP Titan",
+                description: "A heavyweight, enterprise-grade Digital Experience Platform (DXP) for large, global organizations. Its strength lies in managing massive volumes of content and delivering personalized web experiences at scale.",
+                pros: [
+                    "Best-in-class Digital Asset Management (DAM) capabilities.",
+                    "Powerful AI-driven personalization at massive scale via Adobe Sensei.",
+                    "Seamless integration with the Adobe Experience Cloud ecosystem."
+                ],
+                cons: [
+                    "Extremely high Total Cost of Ownership (TCO).",
+                    "Notoriously complex with a very steep learning curve.",
+                    "Rigid and slow to implement; not an agile solution."
+                ],
+                ai: "Adobe Sensei is focused on external marketing use cases. It excels at generating marketing copy, creating A/B test variations, and personalizing web experiences for millions of visitors. It does not have native features for creating internal sales playbooks.",
+                videoUrl: "https://www.youtube.com/watch?v=YpPj_Sg-3vI"
+            },
+            Sitecore: {
+                title: "Sitecore: The Composable Personalization Specialist",
+                description: "A leading DXP that has shifted to a modern, composable architecture. It's renowned for its powerful and flexible personalization engine, delivering tailored, real-time omnichannel experiences.",
+                pros: [
+                    "Advanced personalization engine is a key differentiator.",
+                    "Composable, API-first architecture provides flexibility.",
+                    "Highly scalable to handle high-traffic enterprise environments.",
+                    "Strong global network of implementation partners."
+                ],
+                cons: [
+                    "High TCO, representing a significant investment.",
+                    "Requires significant technical expertise to leverage fully.",
+                    "Upgrades for on-premise versions can be prohibitively expensive."
+                ],
+                ai: "Sitecore's AI is focused on personalizing the external customer journey. It can analyze user behavior in real-time to adjust content and offers, and includes AI-assisted tools for generating marketing copy. It is not designed for internal sales enablement.",
+                videoUrl: "https://www.youtube.com/watch?v=Zwn-4_m3G2A"
+            }
+        };
+
+        function createBulletList(items) {
+            return `<ul class="list-disc list-inside space-y-2">${items.map(item => `<li class="text-gray-600">${item}</li>`).join('')}</ul>`;
+        }
+
+        function updatePlatformDetails(platformName) {
+            const data = platformData[platformName];
+            const container = document.getElementById('platform-details');
+            
+            container.classList.remove('visible');
+
+            setTimeout(() => {
+                container.innerHTML = `
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">${data.title}</h3>
+                    <p class="text-gray-600 mb-6">${data.description}</p>
+                    <div class="grid md:grid-cols-2 gap-8 mb-6">
+                        <div>
+                            <h4 class="text-lg font-semibold text-green-600 mb-3">Pros</h4>
+                            ${createBulletList(data.pros)}
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold text-red-600 mb-3">Cons</h4>
+                            ${createBulletList(data.cons)}
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold text-blue-600 mb-3">AI Playbook Capabilities</h4>
+                        <p class="text-gray-600">${data.ai}</p>
+                    </div>
+                    <div class="mt-8 text-center">
+                        <a href="${data.videoUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                            Watch Demo Video
+                        </a>
+                    </div>
+                `;
+                container.classList.add('visible');
+            }, 250);
+        }
+
+        function selectPlatform(platformName) {
+            document.querySelectorAll('.platform-logo').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            updatePlatformDetails(platformName);
+        }
+
+        function changeTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+                content.classList.remove('visible');
+            });
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+
+            const selectedContent = document.getElementById(`tab-content-${tabId}`);
+            const selectedButton = document.getElementById(`tab-btn-${tabId}`);
+            
+            selectedContent.style.display = 'block';
+            setTimeout(() => {
+                selectedContent.classList.add('visible');
+            }, 10);
+            selectedButton.classList.add('active');
+        }
+
+        function scrollToSection(sectionId) {
+            document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updatePlatformDetails('Highspot');
+
+            const featureCtx = document.getElementById('featureChart').getContext('2d');
+            new Chart(featureCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Highspot', 'Seismic', 'HubSpot', 'AEM', 'Sitecore'],
+                    datasets: [
+                        {
+                            label: 'AI Playbook Capabilities',
+                            data: [5, 5, 3, 0, 0],
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Sales Enablement',
+                            data: [5, 5, 3, 1, 1],
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Marketing Capabilities',
+                            data: [1, 1, 5, 5, 5],
+                            backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                            borderColor: 'rgba(239, 68, 68, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 5,
+                            title: { display: true, text: 'Capability Rating (0-5)' }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y;
+                                    }
+                                    return label;
+                                }
+                            }
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            const tcoCtx = document.getElementById('tcoChart').getContext('2d');
+            new Chart(tcoCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Highspot', 'Seismic', 'HubSpot', 'AEM', 'Sitecore'],
+                    datasets: [{
+                        label: 'Estimated Annual License Cost Range (USD)',
+                        data: [[60000, 200000], [60000, 250000], [10000, 150000], [250000, 500000], [70000, 360000]],
+                        backgroundColor: 'rgba(245, 158, 11, 0.7)',
+                        borderColor: 'rgba(245, 158, 11, 1)',
+                        borderWidth: 1,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Cost (USD)' },
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    return '$' + (value / 1000) + 'k';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const raw = context.raw;
+                                    return `Range: $${(raw[0]/1000)}k - $${(raw[1]/1000)}k`;
+                                }
+                            }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

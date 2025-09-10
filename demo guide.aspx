@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive CNOWv2 Demo Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .accordion-content.open {
+            max-height: 5000px; /* Adjust as needed for content */
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+        .transition-transform {
+            transition: transform 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-blue-800">CNOWv2 Interactive Demo Guide</h1>
+            <p class="text-lg text-gray-600 mt-2">Warren/Jones/Tayler’s Financial and Managerial Accounting, 17e</p>
+        </header>
+
+        <!-- Customization Controls -->
+        <div class="bg-white p-6 rounded-xl shadow-md mb-8 border border-gray-200">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-700">Customize View</h2>
+            <div id="controls" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <div>
+                    <input type="checkbox" id="toggle-platform-story" data-topic="platform-story" class="form-checkbox h-5 w-5 text-blue-600 rounded" checked>
+                    <label for="toggle-platform-story" class="ml-2 text-gray-700">Platform Story</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="toggle-ease-of-setup" data-topic="ease-of-setup" class="form-checkbox h-5 w-5 text-blue-600 rounded" checked>
+                    <label for="toggle-ease-of-setup" class="ml-2 text-gray-700">Ease of Setup</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="toggle-succeed-in-classroom" data-topic="succeed-in-classroom" class="form-checkbox h-5 w-5 text-blue-600 rounded" checked>
+                    <label for="toggle-succeed-in-classroom" class="ml-2 text-gray-700">Succeed in Classroom</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="toggle-build-workplace-skills" data-topic="build-workplace-skills" class="form-checkbox h-5 w-5 text-blue-600 rounded" checked>
+                    <label for="toggle-build-workplace-skills" class="ml-2 text-gray-700">Build Workplace Skills</label>
+                </div>
+                 <div>
+                    <input type="checkbox" id="toggle-go-deeper" data-topic="go-deeper" class="form-checkbox h-5 w-5 text-blue-600 rounded" checked>
+                    <label for="toggle-go-deeper" class="ml-2 text-gray-700">Go Deeper</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accordion Container -->
+        <div id="accordion-container" class="space-y-4">
+
+            <!-- Platform Story Section -->
+            <div class="topic-section" id="platform-story">
+                <button class="accordion-header w-full flex justify-between items-center text-left p-5 bg-blue-700 text-white rounded-lg shadow-md hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <h2 class="text-xl font-semibold">Platform Story: Closing the Gap</h2>
+                    <svg class="w-6 h-6 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div class="accordion-content bg-white border border-gray-200 rounded-b-lg">
+                    <div class="p-6 text-gray-700 space-y-4">
+                        <p class="font-semibold">CNOWv2 closes the gap between the classroom and the real world.</p>
+                        <p>With CNOWv2, instructors can elevate student thinking by supporting and building upon each stage of the learning process from motivation to proficiency. By incorporating real-world tools like Microsoft Excel, Tableau, General Ledger software, and financial statements, students can develop the business and data analytics skills needed to be successful in their course and their future career.</p>
+                        <p>Proven to help hone problem-solving and critical thinking skills, CNOWv2 helps accounting instructors support students in three major ways.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ease of Course Setup Section -->
+            <div class="topic-section" id="ease-of-setup">
+                <button class="accordion-header w-full flex justify-between items-center text-left p-5 bg-green-700 text-white rounded-lg shadow-md hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <h2 class="text-xl font-semibold">Ease of Course Setup</h2>
+                    <svg class="w-6 h-6 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div class="accordion-content bg-white border border-gray-200 rounded-b-lg">
+                    <div class="p-6 text-gray-700 space-y-4">
+                        <h3 class="text-lg font-bold">What to Ask:</h3>
+                        <ul class="list-disc list-inside">
+                            <li>Do you ever find yourself running out of time to set up your course?</li>
+                            <li>What are some of your initial challenges when setting up your Intro Accounting course ahead of the semester?</li>
+                        </ul>
+                        <hr class="my-4">
+                        <h3 class="text-lg font-bold">Course Template</h3>
+                        <p><span class="font-semibold">What to Say:</span> The Intro Accounting Course Template offers ready-made assignments that have been constructed by subject matter experts to save time and can be easily customized to meet teaching goals.</p>
+                        <p><span class="font-semibold">What to Show:</span> From the Courses tab in CNOWv2, select “Create a New Course”. Be sure to select “Copy an Existing Course” and then select “Modify a template course designed by Cengage Learning.”</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Succeed in the Classroom Section -->
+            <div class="topic-section" id="succeed-in-classroom">
+                <button class="accordion-header w-full flex justify-between items-center text-left p-5 bg-purple-700 text-white rounded-lg shadow-md hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <h2 class="text-xl font-semibold">Succeed in the Classroom</h2>
+                    <svg class="w-6 h-6 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div class="accordion-content bg-white border border-gray-200 rounded-b-lg">
+                    <div class="p-6 text-gray-700 space-y-6">
+                        <div>
+                            <h3 class="text-lg font-bold">What to Ask:</h3>
+                            <ul class="list-disc list-inside">
+                                <li>Are your students coming to class prepared?</li>
+                                <li>How do you give your students just-in-time feedback and support?</li>
+                                <li>What resources do you provide to help students outside the classroom?</li>
+                            </ul>
+                        </div>
+                        <hr>
+                        <div>
+                            <h3 class="text-lg font-bold">Adaptive Study Plan</h3>
+                            <p><span class="font-semibold">What to Say:</span> The Adaptive Study Plan is a turn-key pre-class assignment that adapts to each student’s unique needs and provides a remediation pathway. Students take a quiz, get feedback, and then are provided a path with media and practice problems to improve understanding.</p>
+                            <p><span class="font-semibold">What to Show:</span> From the Assignments tab, select a “Chapter Adaptive Study Plan” and preview as a student to demonstrate the 3-step process: quiz, summary, and targeted practice.</p>
+                        </div>
+                        <hr>
+                        <div>
+                            <h3 class="text-lg font-bold">Check My Work Feedback</h3>
+                            <p><span class="font-semibold">What to Say:</span> With Check My Work feedback, students receive instant, generic feedback on their answer each time they click the button, helping them learn as they go.</p>
+                             <p><span class="font-semibold">What to Show:</span> Open a Homework assignment, preview as a student, select a few options, and click "Check My Work" to show the immediate feedback.</p>
+                        </div>
+                        <hr>
+                        <div>
+                            <h3 class="text-lg font-bold">Assignable Video Library</h3>
+                            <p><span class="font-semibold">What to Say:</span> The library provides just-in-time support with "Tell Me More" videos for mastery, "Show Me How" videos for problem-solving, and "Quick Lessons" to introduce key concepts.</p>
+                            <p><span class="font-semibold">What to Show:</span> From the Assignments tab, select a "Video Library" assignment to demonstrate the available video types.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Build Workplace Skills Section -->
+            <div class="topic-section" id="build-workplace-skills">
+                <button class="accordion-header w-full flex justify-between items-center text-left p-5 bg-yellow-600 text-white rounded-lg shadow-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                    <h2 class="text-xl font-semibold">Build Workplace Skills</h2>
+                    <svg class="w-6 h-6 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div class="accordion-content bg-white border border-gray-200 rounded-b-lg">
+                     <div class="p-6 text-gray-700 space-y-6">
+                        <div>
+                            <h3 class="text-lg font-bold">What to Ask:</h3>
+                            <ul class="list-disc list-inside">
+                                <li>How are you integrating Excel into your class?</li>
+                                <li>How are you introducing students to data analytics and data visualization?</li>
+                                <li>Do your students need experience with general ledger software?</li>
+                            </ul>
+                        </div>
+                        <hr>
+                        <div>
+                            <h3 class="text-lg font-bold">Excel Online</h3>
+                            <p><span class="font-semibold">What to Say:</span> Our Excel Online problems seamlessly integrate Excel into the classroom, helping students build hands-on spreadsheet skills. We don't grade the formula to allow for multiple correct approaches, but instructors can spot-check student work.</p>
+                            <p><span class="font-semibold">What to Show:</span> Open an Excel Online problem from a homework assignment. Click the Excel icon to show the embedded spreadsheet where students work.</p>
+                        </div>
+                         <hr>
+                        <div>
+                            <h3 class="text-lg font-bold">Data Analytics Skill Builders (Excel & Tableau)</h3>
+                            <p><span class="font-semibold">What to Say:</span> These activities equip students with highly valued data analytics skills. In Excel, they use pivot tables and functions on large data sets. In Tableau, they engage with algorithmic visualizations to extract insights from dashboards.</p>
+                             <p><span class="font-semibold">What to Show:</span> Select a "Data Analytics Skill Builders" assignment for either Excel or Tableau to show the interactive environment.</p>
+                        </div>
+                        <hr>
+                        <div>
+                            <h3 class="text-lg font-bold">Automated General Ledger Software</h3>
+                            <p><span class="font-semibold">What to Say:</span> General Ledger problems give students hands-on, real-world experience in recording transactions, making adjusting entries, and generating financial statements in a fully automated and graded system.</p>
+                            <p><span class="font-semibold">What to Show:</span> Create a new assignment and add a "Continuing Problems - General Ledger" item to open the software in a new tab.</p>
+                        </div>
+                         <hr>
+                        <div>
+                            <h3 class="text-lg font-bold">Blank Sheet of Paper</h3>
+                            <p><span class="font-semibold">What to Say:</span> To bridge the gap between homework and exams, these problems give a true-to-life experience of balancing a journal entry without dropdown menus. The system provides adaptive feedback based on the specific error a student makes.</p>
+                             <p><span class="font-semibold">What to Show:</span> From a homework assignment, open a "BLANKSHEET" problem. Show the multi-panel view with Instructions, Chart of Accounts, and the General Journal.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Go Deeper Section -->
+            <div class="topic-section" id="go-deeper">
+                <button class="accordion-header w-full flex justify-between items-center text-left p-5 bg-gray-600 text-white rounded-lg shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                    <h2 class="text-xl font-semibold">Go Deeper into Other CNOWv2 Features</h2>
+                    <svg class="w-6 h-6 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div class="accordion-content bg-white border border-gray-200 rounded-b-lg">
+                    <div class="p-6 text-gray-700">
+                        <p>Access these videos and guides to learn more about CNOWv2 features and settings:</p>
+                        <ul class="list-disc list-inside mt-4 space-y-2">
+                            <li>Overview of CNOWv2 video</li>
+                            <li>General Ledger Video</li>
+                            <li>Assignable Video Library Guide</li>
+                            <li>CNOWv2: Data Analytics Skills Builder Exercises Video</li>
+                            <li>CNOWv2: Adaptive Study Plan</li>
+                            <li>DASB Quick Start Guide</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- Accordion Logic ---
+            const accordionHeaders = document.querySelectorAll('.accordion-header');
+            
+            accordionHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const content = header.nextElementSibling;
+                    const icon = header.querySelector('svg');
+
+                    // Close all other accordions
+                    accordionHeaders.forEach(otherHeader => {
+                        if (otherHeader !== header) {
+                            otherHeader.nextElementSibling.classList.remove('open');
+                            otherHeader.querySelector('svg').classList.remove('rotate-180');
+                        }
+                    });
+
+                    // Toggle the clicked accordion
+                    content.classList.toggle('open');
+                    icon.classList.toggle('rotate-180');
+                });
+            });
+
+            // --- Customization/Filter Logic ---
+            const controls = document.getElementById('controls');
+            controls.addEventListener('change', function(event) {
+                if (event.target.type === 'checkbox') {
+                    const topicId = event.target.dataset.topic;
+                    const section = document.getElementById(topicId);
+                    if (section) {
+                        if (event.target.checked) {
+                            section.style.display = 'block';
+                        } else {
+                            section.style.display = 'none';
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
