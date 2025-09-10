@@ -1,11 +1,25 @@
 ---
 ---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Homepage</title>
+</head>
+<body>
 
-<h2>Site Pages</h2>
-<ul>
-  {% for page in site.pages %}
-    {% if page.title and page.url != '/' %}
-      <li><a href="{{ page.url | relative_url }}">{{ page.title }}</a></li>
-    {% endif %}
-  {% endfor %}
-</ul>
+    <h1>Experimental AI Generated Documents</h1>
+    <p>The following are documents that were generated using Gemini (in a Cengage account)</p>
+    <p>They were created using a combination of documents and vibe coding</p>
+
+    <h2>Site Pages</h2>
+    <ul>
+      {% for page in site.pages %}
+        {% if page.title and page.url != '/' %}
+          <li><a href="{{ page.url | relative_url }}">{{ page.title }}</a></li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+
+</body>
+</html>
