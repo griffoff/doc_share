@@ -1,0 +1,459 @@
+---
+title: Executive Briefing
+---
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEO Briefing: Knowledge Leaders Forum 2025</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: Warm Neutral Harmony -->
+    <!-- Application Structure Plan: The application is designed as a single-page dashboard for C-suite pre-meeting preparation. The structure prioritizes quick access and scannability. A top-level navigation switches between a main 'Home' dashboard and dedicated, deep-dive sections for each meeting ('Don Spear', 'Terah Crews'). Each deep-dive section uses an interactive tabbed interface ('Biography', 'Business Model', 'Strategic Focus', 'Market Landscape', 'Cengage Synergy'). This architecture was chosen because a CEO needs to quickly grasp high-level goals (on the main card) and then selectively drill into specific intelligence areas (via tabs) without scrolling through a long, linear document. This non-linear, user-driven flow is more efficient and respects the user's limited time, allowing them to focus on what they deem most important. -->
+    <!-- Visualization & Content Choices: Information from the report and subsequent research is synthesized into actionable intelligence. For OpenSesame's financials (Goal: Inform on scale), a Bar Chart (Chart.js/Canvas) was chosen to visually represent funding rounds, making their growth trajectory immediately apparent. For ReUp's impact (Goal: Inform on success), animated key performance indicators (KPIs) in HTML/CSS are used to create a dynamic and memorable display of their core metrics. Competitor data (Goal: Compare) is presented in a structured HTML table for clear, side-by-side analysis of key players. Interactive tabs (HTML/JS) are used to organize detailed textual information, preventing cognitive overload and allowing for focused exploration of specific topics like strategy or synergy. This blend of visualizations and interactive text blocks supports the overall dashboard structure by presenting complex information in a digestible, engaging, and non-linear format. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8;
+            color: #333D4B;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active {
+            border-bottom-color: #A57E5A;
+            color: #A57E5A;
+        }
+        .nav-link:hover {
+            color: #A57E5A;
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .tab-button.active {
+            border-bottom-color: #BE9A78;
+            color: #BE9A78;
+            font-weight: 600;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container { height: 350px; }
+        }
+        .kpi-number {
+            font-weight: 700;
+            font-size: 2.5rem;
+            line-height: 1;
+            color: #333D4B;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-xl font-bold text-gray-800">
+                CEO Briefing: <span class="text-[#A57E5A]">KLF 2025</span>
+            </div>
+            <div class="flex items-center space-x-8">
+                <a href="#home" class="nav-link text-gray-600 font-medium active">Home</a>
+                <a href="#don-spear" class="nav-link text-gray-600 font-medium">Don Spear (OpenSesame)</a>
+                <a href="#terah-crews" class="nav-link text-gray-600 font-medium">Terah Crews (ReUp)</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        <section id="home" class="min-h-screen pt-16">
+            <div class="text-center max-w-4xl mx-auto">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Knowledge Leaders Forum Briefing</h1>
+                <p class="text-lg text-gray-600 mb-2">Prepared for Michael Hansen</p>
+                <p class="text-gray-500">September 18, 2025 | The St. Regis, Deer Valley, UT</p>
+                <div class="mt-12 p-8 bg-white rounded-2xl shadow-lg border border-gray-200/50">
+                    <p class="text-lg text-gray-700 leading-relaxed">
+                        This interactive briefing provides consolidated intelligence for your key meetings at the Knowledge Leaders Forum. The objective is to equip you with a comprehensive understanding of each individual, their organization's strategic position, and potential synergies with Cengage. Use the navigation above to access detailed briefs for each meeting. Each brief is structured to allow for quick review or a deep dive into specific areas of interest.
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-20 grid md:grid-cols-2 gap-10 max-w-6xl mx-auto">
+                <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200/50 hover:shadow-xl transition-shadow duration-300">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Don Spear</h2>
+                    <p class="text-sm text-gray-500 mb-4">Founder & CEO, OpenSesame</p>
+                    <p class="text-gray-600 mb-6">A deep dive into OpenSesame's AI-driven corporate learning marketplace, their GTM strategy, and their potential as a strategic acquisition target.</p>
+                    <a href="#don-spear" class="inline-block bg-[#A57E5A] text-white font-semibold py-2 px-6 rounded-lg hover:bg-[#8e6a4d] transition-colors">View Briefing</a>
+                </div>
+
+                <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200/50 hover:shadow-xl transition-shadow duration-300">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Terah Crews</h2>
+                    <p class="text-sm text-gray-500 mb-4">CEO, ReUp Education</p>
+                    <p class="text-gray-600 mb-6">An analysis of ReUp's unique tech-enabled service for student re-enrollment and their strong potential for a synergistic partnership with Cengage.</p>
+                    <a href="#terah-crews" class="inline-block bg-[#A57E5A] text-white font-semibold py-2 px-6 rounded-lg hover:bg-[#8e6a4d] transition-colors">View Briefing</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="don-spear" class="min-h-screen pt-24">
+            <div class="bg-white rounded-2xl shadow-xl border border-gray-200/50 overflow-hidden">
+                <div class="p-8 md:p-10 bg-gray-50/50">
+                     <div class="flex flex-col md:flex-row md:items-center gap-6">
+                        <img src="https://media.licdn.com/dms/image/C5603AQFBtJdC3yvKMA/profile-displayphoto-shrink_800_800/0/1516314841160?e=1726704000&v=beta&t=o1n46473x27c8L9_1pD1v73J0eY-8_yZ0R3Z3v-G3J0" alt="Don Spear" class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-md">
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-800">Don Spear</h2>
+                            <p class="text-lg text-gray-600">Founder & CEO, OpenSesame</p>
+                            <div class="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-500">
+                                <span><strong>Meeting:</strong> 11:30 – 12:00 PM</span>
+                                <span><strong>Location:</strong> Hotel Lobby</span>
+                                <span><strong>Primary Goal:</strong> Assess acquisition viability & strategic fit.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-8 md:p-10">
+                    <div class="border-b border-gray-200 mb-6">
+                        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                            <button class="tab-button whitespace-nowrap py-4 px-1 text-base font-medium text-gray-500 hover:text-[#BE9A78] active" data-target="don-tab-1">Biography</button>
+                            <button class="tab-button whitespace-nowrap py-4 px-1 text-base font-medium text-gray-500 hover:text-[#BE9A78]" data-target="don-tab-2">Business Model</button>
+                            <button class="tab-button whitespace-nowrap py-4 px-1 text-base font-medium text-gray-500 hover:text-[#BE9A78]" data-target="don-tab-3">AI Strategy</button>
+                            <button class="tab-button whitespace-nowrap py-4 px-1 text-base font-medium text-gray-500 hover:text-[#BE9A78]" data-target="don-tab-4">Market Landscape</button>
+                            <button class="tab-button whitespace-nowrap py-4 px-1 text-base font-medium text-gray-500 hover:text-[#BE9A78]" data-target="don-tab-5">Cengage Synergy & Talking Points</button>
+                        </nav>
+                    </div>
+
+                    <div id="don-tab-1" class="tab-content active prose max-w-none">
+                        <h3>Personal Background</h3>
+                        <p>Don Spear is a seasoned entrepreneur with over 30 years of experience. Prior to co-founding OpenSesame in 2011, he founded BlueVolt.com, a provider of LMS solutions for industrial sectors. His background includes an MBA from Harvard Business School and service as a US Navy submarine officer, indicating a disciplined and strategic mindset.</p>
+                        <h3>Company Overview: OpenSesame</h3>
+                        <p>OpenSesame operates a large-scale e-learning marketplace for the corporate training and development sector. They position themselves not just as a content provider, but as a comprehensive solution for upskilling and reskilling employees. The company is headquartered in Portland, Oregon, and has seen significant growth, backed by substantial venture capital investment. Their core mission is to help companies develop the world's most productive and admired workforces.</p>
+                         <h3>Financials & Funding</h3>
+                        <p>The company has raised a total of <strong>$102M over 6 rounds</strong>. Their latest and largest was a <strong>$50M Series D round in July 2021</strong>, led by JMI Equity. This significant funding underscores investor confidence in their model and provides them with substantial capital for growth, product development (especially in AI), and market expansion. Your briefing notes mention ~$46M in revenue, which aligns with a company at this funding stage.</p>
+                        <div class="chart-container mt-6">
+                            <canvas id="fundingChart"></canvas>
+                        </div>
+                    </div>
+                    <div id="don-tab-2" class="tab-content prose max-w-none">
+                        <h3>Marketplace Model</h3>
+                        <p>OpenSesame's primary model is a marketplace aggregator. They provide access to over 40,000 courses from a wide range of publishers. This gives customers variety and choice, covering topics from compliance and business skills to highly specific technical training. They operate on a subscription basis, offering curated catalogs to corporate clients.</p>
+                        <h3>Value Proposition</h3>
+                        <p>Their value extends beyond content aggregation. They focus heavily on curation and personalization, using both human experts ("learning advisors") and AI to create bespoke training plans that align with a company's specific goals and employee skill gaps. This consultative approach differentiates them from a simple content library.</p>
+                        <h3>Go-to-Market (GTM) Strategy</h3>
+                        <p>Their GTM is B2B, targeting HR and Learning & Development (L&D) departments within mid-market and enterprise companies. A key part of their strategy is seamless integration with existing Learning Management Systems (LMS), which reduces friction for adoption. They are heavily invested in demonstrating ROI to clients by tracking skills development and its impact on business outcomes.</p>
+                    </div>
+                    <div id="don-tab-3" class="tab-content prose max-w-none">
+                        <h3>Core AI Products</h3>
+                        <ul>
+                            <li><strong>Oro:</strong> Their patented, AI-powered skills engine. Oro assesses employee skill gaps and automatically delivers tailored learning paths. This is central to their "personalized learning at scale" promise.</li>
+                            <li><strong>SmartLists:</strong> An AI-powered curation tool that allows L&D managers to input their needs and instantly receive personalized course recommendations.</li>
+                            <li><strong>Simon:</strong> A course creation tool that uses AI to simplify the development of custom content. It can automatically generate voiceover scripts from slide content, significantly reducing production time for bespoke training modules.</li>
+                        </ul>
+                        <h3>Strategic Importance of AI</h3>
+                        <p>AI is not just a feature for OpenSesame; it's fundamental to their strategy. They use it to solve the "last mile" problem in corporate learning: connecting the right content to the right learner at the right time. By automating personalization and curation, they increase learner engagement and administrative efficiency. They are also capitalizing on the market trend by offering extensive training *on* AI (e.g., their "AI for Everyone Toolkit"), positioning themselves as thought leaders.</p>
+                    </div>
+                    <div id="don-tab-4" class="tab-content prose max-w-none">
+                        <h3>Key Competitors</h3>
+                        <p>The corporate e-learning space is crowded. Their main competitors fall into several categories:</p>
+                        <ul>
+                            <li><strong>Large Content Libraries:</strong> LinkedIn Learning, Udemy Business, Skillsoft, Coursera for Business. These players have massive scale and brand recognition.</li>
+                            <li><strong>Learning Experience Platforms (LXP):</strong> Companies like Degreed and 360Learning focus more on the learner experience and social learning, often integrating content from various sources, including OpenSesame.</li>
+                            <li><strong>Aggregators:</strong> Go1 is a direct competitor with a similar marketplace/aggregator model.</li>
+                        </ul>
+                        <h3>Competitive Differentiation</h3>
+                        <p>OpenSesame differentiates itself through:
+                        <ol>
+                            <li><strong>Quality over Quantity:</strong> They emphasize a rigorous 42-point quality review for all publishers, ensuring a high standard of content.</li>
+                            <li><strong>Advanced AI-driven Personalization:</strong> Their investment in tools like Oro aims to provide more relevant and impactful learning paths than competitors.</li>
+                            <li><strong>Human + AI Curation:</strong> The blend of dedicated learning advisors with AI tools provides a high-touch, customized service that larger, more automated platforms may lack.</li>
+                        </ol>
+                    </div>
+                    <div id="don-tab-5" class="tab-content prose max-w-none">
+                        <h3>Potential for Cengage</h3>
+                        <p><strong>Acquisition Target:</strong> Acquiring OpenSesame would provide Cengage with an immediate, strong foothold in the corporate L&D market. Their B2B sales channel, established customer base, and AI technology would be highly valuable. It aligns with a strategy to diversify beyond higher education into lifelong learning and workforce development.</p>
+                        <p><strong>Synergistic Opportunities:</strong></p>
+                        <ul>
+                            <li><strong>Content Distribution:</strong> Cengage's vast library of content could be distributed through the OpenSesame marketplace, creating a new revenue stream.</li>
+                            <li><strong>Technology Integration:</strong> OpenSesame's AI-driven curation and skills-mapping technology (Oro) could potentially be adapted or integrated into Cengage's existing platforms to enhance personalization for students.</li>
+                            <li><strong>Market Expansion:</strong> Cengage could leverage OpenSesame's platform to offer vocational and skills-based training directly to corporations, bridging the gap between education and employment.</li>
+                        </ul>
+                        <h3>Key Questions & Talking Points</h3>
+                        <ol>
+                            <li>"Don, your investment in AI with Oro and Simon is impressive. How do you see AI evolving from a personalization tool to a core part of the content creation and credentialing process in the next 3-5 years?"</li>
+                            <li>"Your background is in building platforms. What percentage of your catalog is from third-party publishers versus content generated via your 'Simon' tool? How do you see that mix changing?" (This directly addresses a question from the brief).</li>
+                            <li>"Your GTM is focused on L&D leaders. Have you explored selling directly to business unit leaders or creating skills academies for specific corporate functions, moving beyond the traditional L&D buyer?"</li>
+                            <li>"As you look at the competitive landscape with players like LinkedIn Learning, where do you see the most significant opportunity for a platform like yours to win market share? Is it technology, curation, or a specific market segment?"</li>
+                            <li>"Given your growth and Series D funding, what does the future look like for OpenSesame? Are you focused on continued private growth, or are you exploring strategic partnerships or an exit in the coming years?"</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="terah-crews" class="min-h-screen pt-24">
+            <div class="bg-white rounded-2xl shadow-xl border border-gray-200/50 overflow-hidden">
+                <div class="p-8 md:p-10 bg-gray-50/50">
+                    <div class="flex flex-col md:flex-row md:items-center gap-6">
+                        <img src="https://media.licdn.com/dms/image/D5603AQEUfN-l-D3-DA/profile-displayphoto-shrink_800_800/0/1685474071853?e=1726704000&v=beta&t=7E-3v7j3p8L3S4z1uJ3B2o5P-mO-k_p9F1n_d9V4j2Q" alt="Terah Crews" class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-md">
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-800">Terah Crews</h2>
+                            <p class="text-lg text-gray-600">CEO, ReUp Education</p>
+                            <div class="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-500">
+                                <span><strong>Meeting:</strong> 2:00 – 2:50 PM (Session Facilitator)</span>
+                                <span><strong>Location:</strong> Astor Ballroom 2</span>
+                                <span><strong>Primary Goal:</strong> Explore partnership potential to boost student re-enrollment.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-8 md:p-10">
+                    <div class="border-b border-gray-200 mb-6">
+                        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                            <button class="tab-button whitespace-nowrap py-4 px-1 text-base font-medium text-gray-500 hover:text-[#BE9A78] active" data-target="terah-tab-1">Biography</button>
+                            <button class="tab-button whitespace-nowrap py-4 px-1 text-base font-medium text-gray-500 hover:text-[#BE9A78]" data-target="terah-tab-2">Business Model</button>
+                            <button class="tab-button whitespace-nowrap py-4 px-1 text-base font-medium text-gray-500 hover:text-[#BE9A78]" data-target="terah-tab-3">Tech & Data</button>
+                            <button class="tab-button whitespace-nowrap py-4 px-1 text-base font-medium text-gray-500 hover:text-[#BE9A78]" data-target="terah-tab-4">Impact & Metrics</button>
+                            <button class="tab-button whitespace-nowrap py-4 px-1 text-base font-medium text-gray-500 hover:text-[#BE9A78]" data-target="terah-tab-5">Cengage Synergy & Talking Points</button>
+                        </nav>
+                    </div>
+
+                    <div id="terah-tab-1" class="tab-content active prose max-w-none">
+                        <h3>Personal Background</h3>
+                        <p>Terah Crews is the CEO of ReUp Education and is a recognized leader in postsecondary education and student success. Her career has been focused on creating pathways to opportunity for adult learners. Before ReUp, she held senior roles at other education-focused organizations, consistently working on initiatives that blend technology and student support to improve outcomes. Her presence as a facilitator on "Learner Re-engagement" underscores her expertise and passion in this specific niche.</p>
+                        <h3>Company Overview: ReUp Education</h3>
+                        <p>Founded in 2015, ReUp is a mission-driven company that focuses exclusively on a massive, underserved population: the 40+ million US adults with some college credit but no degree. They partner directly with colleges, universities, and state systems to re-engage these "stopped-out" students and support them through to graduation. They are the market leader in this specialized field, combining data science with human coaching to achieve their results.</p>
+                    </div>
+                    <div id="terah-tab-2" class="tab-content prose max-w-none">
+                        <h3>Technology-Enabled Service Model</h3>
+                        <p>ReUp's model is a partnership-based, tech-enabled service. They are not a university or a content provider. Instead, they act as a service layer that sits between an institution and its former students.</p>
+                        <p><strong>The process is typically:</strong></p>
+                        <ol>
+                            <li><strong>Partnership:</strong> ReUp signs a contract with a university or a state system.</li>
+                            <li><strong>Data Analysis:</strong> The partner institution provides data on its population of stopped-out students.</li>
+                            <li><strong>Outreach:</strong> ReUp uses its proprietary data analytics to identify and contact the students most likely to re-enroll.</li>
+                            <li><strong>Coaching & Support:</strong> Once a student shows interest, they are assigned a dedicated "Success Coach" who helps them navigate barriers (financial aid, scheduling, credit transfer) and provides ongoing support until they graduate.</li>
+                        </ol>
+                        <h3>Revenue Model</h3>
+                        <p>ReUp typically operates on a revenue-share model. They partner with institutions and share in the tuition revenue generated from the students they successfully re-enroll. This creates a powerful alignment of incentives: ReUp only succeeds when the student and the institution succeed. This model is highly attractive to universities as it requires little to no upfront investment and generates new revenue from a previously untapped source.</p>
+                    </div>
+                    <div id="terah-tab-3" class="tab-content prose max-w-none">
+                        <h3>Predictive Analytics Core</h3>
+                        <p>The foundation of ReUp's success is its sophisticated use of data. They leverage historical student data from their partners and apply patented predictive scoring models. This allows them to segment the stopped-out population and identify individuals with the highest propensity to return and succeed. This data-driven approach makes their outreach efforts far more efficient and effective than traditional university re-engagement campaigns.</p>
+                        <h3>Personalized Coaching Platform</h3>
+                        <p>While data identifies the students, technology also enables the coaching. ReUp's coaches use a platform that provides a holistic view of each student's journey, tracks their progress, and helps manage communication. This ensures that the high-touch, personalized support can be delivered at scale across their 140+ partner institutions.</p>
+                    </div>
+                    <div id="terah-tab-4" class="tab-content prose max-w-none">
+                        <h3>Proven Success at Scale</h3>
+                        <p>ReUp's impact is significant and quantifiable, which is a key part of their value proposition to partners. Their success validates their model and demonstrates a clear ROI for participating institutions.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center mt-6">
+                            <div class="bg-gray-50 p-6 rounded-lg">
+                                <p class="text-gray-500 text-sm font-medium">Students Re-Enrolled</p>
+                                <p class="kpi-number" data-target="48000">0</p>
+                            </div>
+                            <div class="bg-gray-50 p-6 rounded-lg">
+                                <p class="text-gray-500 text-sm font-medium">Partner Tuition Recaptured</p>
+                                <p class="kpi-number" data-target="156000000">0</p>
+                            </div>
+                             <div class="bg-gray-50 p-6 rounded-lg">
+                                <p class="text-gray-500 text-sm font-medium">Partner Institutions</p>
+                                <p class="kpi-number" data-target="140">0</p>
+                            </div>
+                        </div>
+                        <h3 class="mt-8">Recent Recognition</h3>
+                        <p>Their growth and impact have been recognized publicly. ReUp was recently named to the <strong>2025 Inc. 5000</strong> list of fastest-growing private companies, a testament to the scalability and demand for their solution. They also continue to form strategic partnerships, such as their recent multi-institution collaboration in Minnesota, showcasing a new model for regional student re-engagement.</p>
+                    </div>
+                     <div id="terah-tab-5" class="tab-content prose max-w-none">
+                        <h3>A Highly Synergistic Partnership</h3>
+                        <p>A partnership between Cengage and ReUp appears to be an exceptionally strong strategic fit. The two organizations are complementary, not competitive. ReUp solves the "demand" problem for higher education (getting students back in seats), while Cengage provides the "supply" (the learning materials and platforms those students need to succeed).</p>
+                        <p><strong>Potential Partnership Models:</strong></p>
+                        <ul>
+                            <li><strong>Referral & Co-Marketing:</strong> Cengage could introduce ReUp's services to its vast network of university partners as a value-added solution to boost enrollment. In return, ReUp could highlight Cengage Unlimited or other Cengage products as key tools for returning student success.</li>
+                            <li><strong>Integrated Solution:</strong> A deeper partnership could involve creating an integrated offering. When ReUp re-enrolls a student at a partner school, they could be automatically provisioned with a Cengage Unlimited subscription, funded by the institution as part of a "welcome back" package. This would streamline the student experience and create a sticky ecosystem.</li>
+                            <li><strong>Data Collaboration:</strong> Exploring a data partnership could yield powerful insights. Analyzing data from stopped-out students could help Cengage understand content and platform usage patterns that correlate with attrition, leading to product improvements that boost retention.</li>
+                        </ul>
+                        <h3>Key Questions & Talking Points</h3>
+                        <ol>
+                             <li>"Terah, your focus on the stopped-out student population is fascinating and clearly impactful. As you bring these learners back, what are the biggest challenges they face with course materials and digital learning platforms?"</li>
+                             <li>"Your model is a powerful B2B service for institutions. Have you considered developing a B2C-style 'concierge' service for learners, helping them find the right institution and program to return to, creating a marketplace for students?"</li>
+                             <li>"We see a powerful synergy between your re-enrollment service and our Cengage Unlimited subscription. Have you explored bundling learning materials into your re-engagement packages to reduce a key cost and friction point for returning students?"</li>
+                            <li>"Your new Minnesota partnership is a great model for regional collaboration. How do you see the roles of state systems versus individual institutions evolving in the effort to bring back adult learners?"</li>
+                            <li>"At Cengage, we are deeply focused on student success and retention. A partnership seems very natural. What would an ideal collaboration look like from your perspective to maximize our combined impact on student completion?"</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            const activateNavLink = (link) => {
+                navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+            };
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => activateNavLink(link));
+            });
+            
+            const onScroll = () => {
+                let currentSection = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 150) {
+                        currentSection = section.getAttribute('id');
+                    }
+                });
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').substring(1) === currentSection) {
+                        link.classList.add('active');
+                    }
+                });
+            };
+
+            window.addEventListener('scroll', onScroll);
+
+            const activateTab = (button) => {
+                const targetId = button.dataset.target;
+                const parent = button.closest('.p-8, .p-10');
+                
+                parent.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                parent.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === targetId) {
+                        content.classList.add('active');
+                    }
+                });
+            };
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => activateTab(button));
+            });
+
+            const animateKpi = (el) => {
+                const target = +el.dataset.target;
+                let current = 0;
+                const increment = target / 100;
+                
+                const updateCount = () => {
+                    current += increment;
+                    if (current < target) {
+                        if(target > 100000) {
+                            el.textContent = '$' + Math.ceil(current).toLocaleString();
+                        } else if (target > 1000) {
+                            el.textContent = Math.ceil(current).toLocaleString();
+                        }
+                        else {
+                             el.textContent = Math.ceil(current);
+                        }
+                        requestAnimationFrame(updateCount);
+                    } else {
+                        if(target > 100000) {
+                            el.textContent = '$' + target.toLocaleString();
+                        } else {
+                            el.textContent = target.toLocaleString();
+                        }
+                    }
+                };
+                updateCount();
+            };
+
+            const kpiObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const kpiNumbers = entry.target.querySelectorAll('.kpi-number');
+                        kpiNumbers.forEach(num => animateKpi(num));
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            const reupSection = document.getElementById('terah-tab-4');
+            if(reupSection) {
+                kpiObserver.observe(reupSection);
+            }
+
+            const ctx = document.getElementById('fundingChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Series B (Sep 2016)', 'Series C (May 2019)', 'Series D (Jul 2021)'],
+                        datasets: [{
+                            label: 'Funding Amount (in USD Millions)',
+                            data: [9, 28, 50],
+                            backgroundColor: [
+                                'rgba(190, 154, 120, 0.6)',
+                                'rgba(165, 126, 90, 0.6)',
+                                'rgba(142, 106, 77, 0.6)'
+                            ],
+                            borderColor: [
+                                'rgba(190, 154, 120, 1)',
+                                'rgba(165, 126, 90, 1)',
+                                'rgba(142, 106, 77, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Amount (Millions USD)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'OpenSesame Key Funding Rounds',
+                                font: {
+                                    size: 16
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
