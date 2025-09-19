@@ -1,0 +1,138 @@
+---
+title: Cengage AI for ROI: Strategic Mind Map
+---
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Cengage AI for ROI: Strategic Mind Map</title><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet"><style>body{font-family:'Poppins',sans-serif;background-color:#f9fafb;display:flex;justify-content:center;padding:2rem;}.mindmap-container{text-align:center;}.mindmap ul{padding-left:0;margin:0;list-style-type:none;display:flex;position:relative;}.mindmap li{display:flex;flex-direction:column;align-items:center;padding:1rem .5rem;position:relative;}.node{padding:.75rem 1.5rem;border-radius:8px;background-color:#fff;border:2px solid;box-shadow:0 4px 6px rgba(0,0,0,.05);cursor:pointer;min-width:150px;text-align:center;}.node.level-0{border-color:#002D5A;background-color:#002D5A;color:#fff;}.node.level-1{border-color:#F58220;}.node.level-2{border-color:#005387;}.node-title{font-weight:600;}.node-detail{font-size:.8rem;color:#4b5563;margin-top:4px;}.mindmap li::before,.mindmap li::after{content:'';position:absolute;top:0;left:50%;border-color:#d1d5db;border-style:solid;border-width:0 0 2px 2px;width:50%;height:1rem;}.mindmap li::after{left:0;border-width:0 2px 2px 0;}.mindmap li:first-child::before,.mindmap li:last-child::after{border:none;}.mindmap>li>.node{margin-bottom:1rem;}.mindmap>li>ul::before{content:'';position:absolute;top:-1rem;left:50%;border-left:2px solid #d1d5db;width:0;height:1rem;}.mindmap ul ul{display:none;}.node.expanded+ul{display:flex;}</style></head><body><div class="mindmap-container"><h1>Cengage AI for ROI: Strategic Mind Map</h1><p>Click nodes to expand/collapse.</p><ul class="mindmap" id="mindmap-root"></ul></div><script>const mindmapData={
+  "title": "Cengage AI Opportunities",
+  "children": [
+    {
+      "title": "Biggest Bang for the Buck",
+      "children": [
+        {
+          "title": "Top Vendors",
+          "children": [
+            {
+              "title": " OKTA INC ",
+              "detail": "$3.6M"
+            },
+            {
+              "title": " SALESFORCE.COM INC ",
+              "detail": "$3.4M"
+            },
+            {
+              "title": " AMAZON WEB SERVICES LLC ",
+              "detail": "$2.8M"
+            },
+            {
+              "title": " MICROSOFT CORPORATION ",
+              "detail": "$2.4M"
+            },
+            {
+              "title": " SHI INTERNATIONAL CORP ",
+              "detail": "$2.1M"
+            }
+          ]
+        },
+        {
+          "title": "Top Spending Categories",
+          "children": [
+            {
+              "title": "Business Intelligence",
+              "detail": "$0.0"
+            },
+            {
+              "title": "Cloud, Tech Ops",
+              "detail": "$0.0"
+            },
+            {
+              "title": "Commerce",
+              "detail": "$0.0"
+            },
+            {
+              "title": "Communications",
+              "detail": "$0.0"
+            },
+            {
+              "title": "Content management",
+              "detail": "$0.0"
+            }
+          ]
+        },
+        {
+          "title": "High-Cost COTS",
+          "children": []
+        }
+      ]
+    },
+    {
+      "title": "Lowest Hanging Fruit",
+      "children": [
+        {
+          "title": "Process Automation",
+          "children": [
+            {
+              "title": "Blackline",
+              "detail": "in Finance, ERP, Royalties"
+            },
+            {
+              "title": "BloomReach - GTS",
+              "detail": "in Commerce"
+            },
+            {
+              "title": "Bongo Admin",
+              "detail": "in Employee Apps"
+            },
+            {
+              "title": "Brightflag",
+              "detail": "in Legal"
+            },
+            {
+              "title": "Cengage Asia Website",
+              "detail": "in Marketing"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Most Audacious Opportunity",
+      "children": [
+        {
+          "title": "Portfolio Consolidation",
+          "children": [
+            {
+              "title": "Infra platforms",
+              "detail": "169 apps"
+            },
+            {
+              "title": "Product (excluding platforms)",
+              "detail": "95 apps"
+            },
+            {
+              "title": "Marketing",
+              "detail": "85 apps"
+            },
+            {
+              "title": "Employee Apps",
+              "detail": "66 apps"
+            },
+            {
+              "title": "Finance, ERP, Royalties",
+              "detail": "66 apps"
+            }
+          ]
+        },
+        {
+          "title": "Generative AI",
+          "children": [
+            {
+              "title": "Content Creation"
+            },
+            {
+              "title": "Personalized Learning"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+};function createNode(t,e){let d=document.createElement("li"),o=document.createElement("div");o.className=`node level-${e}`;let n=document.createElement("div");n.className="node-title",n.textContent=t.title,o.appendChild(n),t.detail&&({let a=document.createElement("div");a.className="node-detail",a.textContent=t.detail,o.appendChild(a)}),d.appendChild(o),t.children&&t.children.length>0&&(o.classList.add("has-children"),{let i=document.createElement("ul");t.children.forEach(t=>i.appendChild(createNode(t,e+1))),d.appendChild(i)});return d}document.addEventListener("DOMContentLoaded",()=>{const t=document.getElementById("mindmap-root");t.appendChild(createNode(mindmapData,0)),t.addEventListener("click",t=>{const e=t.target.closest(".node.has-children");e&&e.classList.toggle("expanded")}),document.querySelector(".node.level-0").classList.add("expanded"),document.querySelectorAll(".node.level-1").forEach(t=>t.classList.add("expanded"))});</script></body></html>
