@@ -1,138 +1,392 @@
 ---
 title: Cengage AI for ROI - Strategic Mind Map
 ---
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Cengage AI for ROI: Strategic Mind Map</title><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet"><style>body{font-family:'Poppins',sans-serif;background-color:#f9fafb;display:flex;justify-content:center;padding:2rem;}.mindmap-container{text-align:center;}.mindmap ul{padding-left:0;margin:0;list-style-type:none;display:flex;position:relative;}.mindmap li{display:flex;flex-direction:column;align-items:center;padding:1rem .5rem;position:relative;}.node{padding:.75rem 1.5rem;border-radius:8px;background-color:#fff;border:2px solid;box-shadow:0 4px 6px rgba(0,0,0,.05);cursor:pointer;min-width:150px;text-align:center;}.node.level-0{border-color:#002D5A;background-color:#002D5A;color:#fff;}.node.level-1{border-color:#F58220;}.node.level-2{border-color:#005387;}.node-title{font-weight:600;}.node-detail{font-size:.8rem;color:#4b5563;margin-top:4px;}.mindmap li::before,.mindmap li::after{content:'';position:absolute;top:0;left:50%;border-color:#d1d5db;border-style:solid;border-width:0 0 2px 2px;width:50%;height:1rem;}.mindmap li::after{left:0;border-width:0 2px 2px 0;}.mindmap li:first-child::before,.mindmap li:last-child::after{border:none;}.mindmap>li>.node{margin-bottom:1rem;}.mindmap>li>ul::before{content:'';position:absolute;top:-1rem;left:50%;border-left:2px solid #d1d5db;width:0;height:1rem;}.mindmap ul ul{display:none;}.node.expanded+ul{display:flex;}</style></head><body><div class="mindmap-container"><h1>Cengage AI for ROI: Strategic Mind Map</h1><p>Click nodes to expand/collapse.</p><ul class="mindmap" id="mindmap-root"></ul></div><script>const mindmapData={
-  "title": "Cengage AI Opportunities",
-  "children": [
-    {
-      "title": "Biggest Bang for the Buck",
-      "children": [
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive AI Opportunity Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            overflow: hidden;
+        }
+        .node circle {
+            cursor: pointer;
+            stroke-width: 2px;
+            transition: all 0.3s ease;
+        }
+        .node text {
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            fill: #334155;
+        }
+        .node--leaf text {
+            fill: #0f172a;
+        }
+        .link {
+            fill: none;
+            stroke: #cbd5e1;
+            stroke-width: 1.5px;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="w-screen h-screen">
+
+    <div class="absolute top-0 left-0 p-6 z-10">
+        <h1 class="text-2xl font-bold text-slate-800">Cengage AI Opportunity Explorer</h1>
+        <p class="text-slate-500">Click nodes to expand. Click on a final topic to ask the AI for analysis.</p>
+    </div>
+    
+    <div id="mindmap-container" class="w-full h-full"></div>
+
+    <div id="ai-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="modal-title" class="text-xl font-bold text-slate-800">Analyzing...</h2>
+                <button id="close-modal" class="text-slate-500 hover:text-slate-800">&times;</button>
+            </div>
+            <div id="modal-body">
+                <div class="loader"></div>
+                <p class="text-center text-slate-500">Asking Gemini for insights based on the provided Cengage data...</p>
+            </div>
+        </div>
+    </div>
+
+<script>
+// --- Data and Configuration ---
+
+// This is the hierarchical data structure for the mind map itself.
+const mindmapData = {
+    "name": "Cengage AI Opportunities",
+    "children": [
         {
-          "title": "Top Vendors",
-          "children": [
-            {
-              "title": " OKTA INC ",
-              "detail": "$3.6M"
-            },
-            {
-              "title": " SALESFORCE.COM INC ",
-              "detail": "$3.4M"
-            },
-            {
-              "title": " AMAZON WEB SERVICES LLC ",
-              "detail": "$2.8M"
-            },
-            {
-              "title": " MICROSOFT CORPORATION ",
-              "detail": "$2.4M"
-            },
-            {
-              "title": " SHI INTERNATIONAL CORP ",
-              "detail": "$2.1M"
-            }
-          ]
+            "name": "Biggest Bang for the Buck",
+            "description": "High-spend optimization",
+            "children": [
+                { "name": "Top Vendors by Cost", "children": [
+                    { "name": "AMAZON WEB SERVICES LLC", "value": 1429424 },
+                    { "name": "SALESFORCE", "value": 976561 },
+                    { "name": "SNOWFLAKE COMPUTING INC", "value": 637500 },
+                    { "name": "SPINNAKER", "value": 504688 },
+                    { "name": "SMARTSHEET INC", "value": 449305 }
+                ]},
+                { "name": "High-Cost COTS Apps", "children": [
+                    { "name": "Salesforce Marketing Cloud", "value": 976561},
+                    { "name": "Okta", "value": 200000},
+                    { "name": "ZoomInfo", "value": 150000}
+                ]},
+                { "name": "Top Spending Categories", "children": [
+                    { "name": "Infra platforms", "value": 500000},
+                    { "name": "Marketing", "value": 450000},
+                    { "name": "Sales", "value": 300000}
+                ]}
+            ]
         },
         {
-          "title": "Top Spending Categories",
-          "children": [
-            {
-              "title": "Business Intelligence",
-              "detail": "$0.0"
-            },
-            {
-              "title": "Cloud, Tech Ops",
-              "detail": "$0.0"
-            },
-            {
-              "title": "Commerce",
-              "detail": "$0.0"
-            },
-            {
-              "title": "Communications",
-              "detail": "$0.0"
-            },
-            {
-              "title": "Content management",
-              "detail": "$0.0"
-            }
-          ]
+            "name": "Lowest Hanging Fruit",
+            "description": "Immediate efficiency gains",
+            "children": [
+                { "name": "Process Automation", "children": [
+                    { "name": "Academic Marketing Database (ACA)" },
+                    { "name": "3D Issue" },
+                    { "name": "ZoomInfo - Infosec" },
+                ]}
+            ]
         },
         {
-          "title": "High-Cost COTS",
-          "children": []
+            "name": "Most Audacious Opportunity",
+            "description": "Transformative initiatives",
+            "children": [
+                { "name": "Portfolio Consolidation", "children": [
+                     { "name": "Marketing Applications" },
+                     { "name": "Infra platforms" },
+                ]},
+                {
+                    "name": "Generative AI",
+                    "children": [
+                        { "name": "AI Content Creation Tools" },
+                        { "name": "Personalized Learning Paths" },
+                        { "name": "Developer Productivity Tools" }
+                    ]
+                }
+            ]
         }
-      ]
-    },
-    {
-      "title": "Lowest Hanging Fruit",
-      "children": [
-        {
-          "title": "Process Automation",
-          "children": [
-            {
-              "title": "Blackline",
-              "detail": "in Finance, ERP, Royalties"
-            },
-            {
-              "title": "BloomReach - GTS",
-              "detail": "in Commerce"
-            },
-            {
-              "title": "Bongo Admin",
-              "detail": "in Employee Apps"
-            },
-            {
-              "title": "Brightflag",
-              "detail": "in Legal"
-            },
-            {
-              "title": "Cengage Asia Website",
-              "detail": "in Marketing"
-            }
-          ]
+    ]
+};
+
+// This is the raw data from your spreadsheets, concatenated and formatted for the AI.
+// This provides the context for the generative AI questions.
+const sourceDataContext = `
+    APM Data:
+    Number,Name,Description,Status,Vendor Name,Application category,Business process,Application type,Cost
+    APM0001019,3D Issue,"Online replica sample platform (catalogs, eSamples); replaces NXTBook Media",In Production,,Marketing,Marketing,COTS,
+    APM0001021,Academic Marketing Database (ACA),Customer Information for Higher Ed and ELT (large part is ELT). Filemaker database.,In Production,,Marketing,Marketing,On Premise,15000
+    APM0001612,Abstract,Design version management application,In Production,,Infra platforms,Platform Development,COTS,25000
+    APM0002046,ZoomInfo - Infosec,marketing & sales contact database; aka DiscoverOrg,In Production,Zoominfo,Sales,Sales,COTS,150000
+    APM0001759,Zulu Java,"Java maintenance, updates, and support",In Production,AZUL SYSTEMS INC,Infra platforms,Enterprise Computing,COTS,286090
+
+    GTS Softwares Data:
+    Vendor,Description,FY26 Total
+    AMAZON WEB SERVICES LLC,Splunk Cloud SaaS License Fee,1429424
+    AMAZON WEB SERVICES LLC,Salesforce Marketing Data Cloud Licenses,976561
+    SNOWFLAKE COMPUTING INC,Cloud Storage,637500
+    SPINNAKER,Oracle Maintenance Support Services,504688
+    SMARTSHEET INC,"Gold enterprise licenses",449305
+    ATOLIO INC,Enterprise Search Platform,360491
+    SOVOS COMPLIANCE LLC,Consolidated Sovos subscription,355484
+    AZUL SYSTEMS INC,"Azul Platform Core, Standard Support",286090
+    OKTA,"Okta Enterprise SSO",200000
+`;
+
+// --- D3 Mind Map Implementation ---
+
+const container = d3.select("#mindmap-container");
+const width = container.node().getBoundingClientRect().width;
+const height = container.node().getBoundingClientRect().height;
+
+const svg = container.append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .call(d3.zoom().on("zoom", (event) => g.attr("transform", event.transform)))
+    .append("g");
+
+const g = svg.append("g");
+
+const tree = d3.tree().size([height, width - 400]);
+let root = d3.hierarchy(mindmapData);
+
+root.x0 = height / 2;
+root.y0 = 0;
+
+root.descendants().forEach((d, i) => {
+    d.id = i;
+    d._children = d.children;
+    if (d.depth > 1) d.children = null;
+});
+
+function update(source) {
+    const duration = 250;
+    const nodes = root.descendants().reverse();
+    const links = root.links();
+
+    tree(root);
+
+    let left = root;
+    let right = root;
+    root.eachBefore(node => {
+        if (node.x < left.x) left = node;
+        if (node.x > right.x) right = node;
+    });
+
+    const newHeight = right.x - left.x + 80;
+    svg.transition().duration(duration).attr("viewBox", [-200, left.x - 40, width, newHeight]);
+
+    const node = g.selectAll("g.node")
+        .data(nodes, d => d.id);
+    
+    // Enter any new nodes at the parent's previous position.
+    const nodeEnter = node.enter().append("g")
+        .attr("class", "node")
+        .attr("transform", d => `translate(${source.y0},${source.x0})`)
+        .on("click", click);
+
+    nodeEnter.append("circle")
+        .attr("r", 0)
+        .attr("fill", d => d._children ? "#3b82f6" : "#e2e8f0")
+        .attr("stroke", d => d._children ? "#1d4ed8" : "#94a3b8");
+
+    nodeEnter.append("text")
+        .attr("x", d => d._children ? -12 : 12)
+        .attr("dy", ".35em")
+        .attr("text-anchor", d => d._children ? "end" : "start")
+        .text(d => d.data.name)
+        .style("fill-opacity", 0);
+
+    // Transition nodes to their new position.
+    const nodeUpdate = node.merge(nodeEnter).transition(duration)
+        .attr("transform", d => `translate(${d.y},${d.x})`);
+
+    nodeUpdate.select("circle")
+        .attr("r", 8)
+        .attr("fill", d => d._children ? "#3b82f6" : "#e2e8f0")
+        .attr("stroke", d => d._children ? "#1d4ed8" : "#94a3b8");
+
+    nodeUpdate.select("text").style("fill-opacity", 1);
+
+    // Transition exiting nodes to the parent's new position.
+    const nodeExit = node.exit().transition(duration)
+        .attr("transform", d => `translate(${source.y},${source.x})`)
+        .remove();
+
+    nodeExit.select("circle").attr("r", 0);
+    nodeExit.select("text").style("fill-opacity", 0);
+
+    // Update the links…
+    const link = g.selectAll("path.link")
+        .data(links, d => d.target.id);
+    
+    const linkEnter = link.enter().insert("path", "g")
+        .attr("class", "link")
+        .attr("d", d => {
+            const o = {x: source.x0, y: source.y0};
+            return d3.linkHorizontal()({source: o, target: o});
+        });
+
+    link.merge(linkEnter).transition(duration)
+        .attr("d", d3.linkHorizontal().x(d => d.y).y(d => d.x));
+
+    link.exit().transition(duration)
+        .attr("d", d => {
+            const o = {x: source.x, y: source.y};
+            return d3.linkHorizontal()({source: o, target: o});
+        })
+        .remove();
+
+    root.each(d => {
+        d.x0 = d.x;
+        d.y0 = d.y;
+    });
+}
+
+function click(event, d) {
+    if (d.children || d._children) {
+        // This is a branch node, expand or collapse it
+        if (d.children) {
+            d._children = d.children;
+            d.children = null;
+        } else {
+            d.children = d._children;
+            d._children = null;
         }
-      ]
-    },
-    {
-      "title": "Most Audacious Opportunity",
-      "children": [
-        {
-          "title": "Portfolio Consolidation",
-          "children": [
-            {
-              "title": "Infra platforms",
-              "detail": "169 apps"
-            },
-            {
-              "title": "Product (excluding platforms)",
-              "detail": "95 apps"
-            },
-            {
-              "title": "Marketing",
-              "detail": "85 apps"
-            },
-            {
-              "title": "Employee Apps",
-              "detail": "66 apps"
-            },
-            {
-              "title": "Finance, ERP, Royalties",
-              "detail": "66 apps"
-            }
-          ]
-        },
-        {
-          "title": "Generative AI",
-          "children": [
-            {
-              "title": "Content Creation"
-            },
-            {
-              "title": "Personalized Learning"
-            }
-          ]
-        }
-      ]
+        update(d);
+    } else {
+        // This is a leaf node, ask the AI
+        askAI(d);
     }
-  ]
-};function createNode(t,e){let d=document.createElement("li"),o=document.createElement("div");o.className=`node level-${e}`;let n=document.createElement("div");n.className="node-title",n.textContent=t.title,o.appendChild(n),t.detail&&({let a=document.createElement("div");a.className="node-detail",a.textContent=t.detail,o.appendChild(a)}),d.appendChild(o),t.children&&t.children.length>0&&(o.classList.add("has-children"),{let i=document.createElement("ul");t.children.forEach(t=>i.appendChild(createNode(t,e+1))),d.appendChild(i)});return d}document.addEventListener("DOMContentLoaded",()=>{const t=document.getElementById("mindmap-root");t.appendChild(createNode(mindmapData,0)),t.addEventListener("click",t=>{const e=t.target.closest(".node.has-children");e&&e.classList.toggle("expanded")}),document.querySelector(".node.level-0").classList.add("expanded"),document.querySelectorAll(".node.level-1").forEach(t=>t.classList.add("expanded"))});</script></body></html>
+}
+
+update(root);
+
+// --- Gemini API Integration ---
+
+const modal = document.getElementById("ai-modal");
+const modalTitle = document.getElementById("modal-title");
+const modalBody = document.getElementById("modal-body");
+const closeModalBtn = document.getElementById("close-modal");
+
+closeModalBtn.addEventListener("click", () => modal.classList.remove("active"));
+modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.classList.remove("active");
+});
+
+async function askAI(node) {
+    modalTitle.textContent = `Analyzing: ${node.data.name}`;
+    modalBody.innerHTML = `<div class="loader"></div><p class="text-center text-slate-500">Asking Gemini for insights based on the provided Cengage data...</p>`;
+    modal.classList.add("active");
+
+    const parentContext = node.parent ? node.parent.data.name : "the overall Cengage strategy";
+    const question = `Based on the data provided, tell me about "${node.data.name}" in the context of "${parentContext}". What is its significance for cost savings or AI opportunities? Be specific and use only the information from the data.`;
+    
+    const systemPrompt = `You are a helpful business analyst for Cengage. Your task is to analyze the provided spreadsheet data and answer questions. Base your answers strictly on the data provided and do not invent information. Keep your answers concise and focused on business impact. Here is the relevant spreadsheet data: \n\n${sourceDataContext}`;
+    const apiKey = ""; // Canvas will provide this
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+    const payload = {
+        contents: [{ parts: [{ text: question }] }],
+        systemInstruction: {
+            parts: [{ text: systemPrompt }]
+        },
+    };
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            throw new Error(`API Error: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        const candidate = result.candidates?.[0];
+        let text = "No response from AI.";
+        if (candidate && candidate.content?.parts?.[0]?.text) {
+            text = candidate.content.parts[0].text;
+            // Basic markdown-to-HTML
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                       .replace(/\n/g, '<br>');
+        }
+        modalBody.innerHTML = `<div class="prose max-w-none">${text}</div>`;
+
+    } catch (error) {
+        console.error("Error calling Gemini API:", error);
+        modalBody.innerHTML = `<p class="text-red-500">Sorry, there was an error getting insights. Please check the console for details.</p>`;
+    }
+}
+
+// Adjust size on window resize
+window.addEventListener('resize', () => {
+    const newWidth = container.node().getBoundingClientRect().width;
+    const newHeight = container.node().getBoundingClientRect().height;
+    svg.attr('width', newWidth).attr('height', newHeight);
+});
+
+</script>
+</body>
+</html>
