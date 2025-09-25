@@ -1,0 +1,206 @@
+---
+title: Atolio Status
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atolio Project: Status & Strategic Options</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Custom styles for details/summary accordion */
+        details > summary {
+            list-style: none;
+            cursor: pointer;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        details > summary::before {
+            content: '►';
+            margin-right: 0.75rem;
+            font-size: 0.8em;
+            transition: transform 0.2s ease-in-out;
+            display: inline-block;
+        }
+        details[open] > summary::before {
+            transform: rotate(90deg);
+        }
+
+        /* Custom styles for CSS-only tabs */
+        .tabs input[type="radio"] {
+            display: none;
+        }
+        .tabs .tab-label {
+            display: inline-block;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s ease-in-out;
+            color: #9ca3af; /* gray-400 */
+        }
+        .tabs .tab-label:hover {
+            color: #d1d5db; /* gray-300 */
+        }
+        .tabs .tab-content {
+            display: none;
+            padding: 1.5rem;
+            border-top: 1px solid #374151; /* gray-700 */
+        }
+        .tabs input[type="radio"]:checked + .tab-label {
+            color: #ffffff;
+            border-bottom-color: #3b82f6; /* blue-500 */
+        }
+        .tabs input[type="radio"]:checked + .tab-label + .tab-content {
+            display: block;
+        }
+
+        /* Animation for cards */
+        .metric-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+
+    <div class="max-w-5xl mx-auto p-4 sm:p-8">
+
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <h1 class="text-3xl sm:text-4xl font-bold text-white tracking-tight">Atolio Enterprise Search</h1>
+            <p class="mt-2 text-lg text-gray-400">Project Status & Strategic Options</p>
+        </header>
+
+        <!-- Metrics Dashboard -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-semibold mb-6 border-l-4 border-blue-500 pl-4">Project at a Glance</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Contract Value Card -->
+                <div class="metric-card bg-gray-800 p-6 rounded-lg border border-gray-700">
+                    <h3 class="text-sm font-medium text-gray-400">Contract Value</h3>
+                    <p class="mt-1 text-3xl font-semibold text-white">$1.16M</p>
+                    <div class="h-1 bg-blue-500 rounded-full mt-4"></div>
+                </div>
+                <!-- Contract Term Card -->
+                <div class="metric-card bg-gray-800 p-6 rounded-lg border border-gray-700">
+                    <h3 class="text-sm font-medium text-gray-400">Contract Term</h3>
+                    <p class="mt-1 text-3xl font-semibold text-white">3 Years</p>
+                    <p class="text-sm text-gray-500 mt-1">Nov 2024 - Nov 2027</p>
+                </div>
+                <!-- Users Onboarded Card -->
+                <div class="metric-card bg-gray-800 p-6 rounded-lg border border-gray-700">
+                    <h3 class="text-sm font-medium text-gray-400">Users Onboarded</h3>
+                    <p class="mt-1 text-3xl font-semibold text-white">2,300 <span class="text-lg font-normal text-gray-400">/ 4,200</span></p>
+                     <div class="w-full bg-gray-700 rounded-full h-1.5 mt-4">
+                        <div class="bg-green-500 h-1.5 rounded-full" style="width: 55%"></div>
+                    </div>
+                </div>
+                <!-- Weekly Active Users Card -->
+                <div class="metric-card bg-gray-800 p-6 rounded-lg border border-gray-700">
+                    <h3 class="text-sm font-medium text-gray-400">Weekly Active Users</h3>
+                    <p class="mt-1 text-3xl font-semibold text-white">~100</p>
+                     <p class="text-sm text-gray-500 mt-1">out of 650 who have logged in</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Accordion for Details -->
+        <section class="space-y-6 mb-12">
+             <!-- Current Situation -->
+            <div class="bg-gray-800 border border-gray-700 rounded-lg p-6">
+                <details>
+                    <summary class="text-lg font-semibold text-white">Current Situation: Slow Adoption</summary>
+                    <div class="mt-4 text-gray-300 space-y-3">
+                        <p>The project was launched to address the challenge of finding information across the company. However, adoption has been slower than anticipated due to several factors.</p>
+                        <ul class="list-disc list-inside space-y-2 pl-2">
+                            <li><strong class="text-white">Technical Issues:</strong> The project has been hampered by initial technical problems with the Atolio platform.</li>
+                            <li><strong class="text-white">Organizational Volatility:</strong> Internal team resource changes and departmental shifts have impacted momentum.</li>
+                            <li><strong class="text-white">Data Trust:</strong> Users are hesitant to trust responses because of the large amount of outdated or incorrect information held in our source systems.</li>
+                            <li><strong class="text-white">Security Concerns:</strong> A cautious, intentionally slow rollout was implemented due to a fear of exposing sensitive information.</li>
+                        </ul>
+                    </div>
+                </details>
+            </div>
+             <!-- Contractual Obligations -->
+            <div class="bg-gray-800 border border-gray-700 rounded-lg p-6">
+                <details>
+                    <summary class="text-lg font-semibold text-white">Contractual Obligations: Financially Binding</summary>
+                    <div class="mt-4 text-gray-300 space-y-3">
+                        <p>Our Master Subscription Agreement (MSA) does not contain a clause for early termination for convenience. Our legal and financial obligations are clear:</p>
+                        <ul class="list-disc list-inside space-y-2 pl-2">
+                            <li>Payment obligations are <strong class="text-white">non-cancelable</strong> and fees paid are <strong class="text-white">non-refundable</strong>.</li>
+                            <li>The number of purchased subscriptions cannot be decreased during the 3-year term.</li>
+                            <li>Termination is only possible for a material breach that remains uncured after 30 days' written notice.</li>
+                        </ul>
+                        <p class="bg-yellow-900/50 text-yellow-200 border border-yellow-700 p-4 rounded-md">
+                            <strong>Financial Bottom Line:</strong> A decision to stop using the service would likely not relieve the company from the full $1.16M financial obligation.
+                        </p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- Strategic Options Tabs -->
+        <section>
+            <h2 class="text-2xl font-semibold mb-6 border-l-4 border-blue-500 pl-4">Strategic Options Moving Forward</h2>
+            <div class="bg-gray-800 rounded-lg border border-gray-700">
+                <div class="tabs">
+                    <!-- Tab 1: Full Shutdown -->
+                    <input type="radio" id="option1" name="options" checked>
+                    <label for="option1" class="tab-label">1. Full Shutdown</label>
+                    <div class="tab-content">
+                        <h4 class="text-xl font-bold text-white mb-2">Discontinue all use of the platform and cease internal support.</h4>
+                        <p class="text-gray-400 mb-4">This option minimizes immediate internal effort but has significant financial drawbacks.</p>
+                        <ul class="space-y-3">
+                            <li class="flex items-start"><span class="text-red-400 mr-3 mt-1">&#10007;</span><div><strong class="text-white">Financial Impact:</strong> The full contract value of $1.16M is likely still payable, resulting in a 100% loss on the investment.</div></li>
+                            <li class="flex items-start"><span class="text-red-400 mr-3 mt-1">&#10007;</span><div><strong class="text-white">Business Impact:</strong> The ~100 weekly active users lose access to a tool they value. The core business problem of inefficient information discovery remains unsolved.</div></li>
+                            <li class="flex items-start"><span class="text-green-400 mr-3 mt-1">&#10003;</span><div><strong class="text-white">Resource Impact:</strong> Frees up the minimal internal resources currently allocated to the project.</div></li>
+                        </ul>
+                    </div>
+
+                    <!-- Tab 2: Minimal Maintenance -->
+                    <input type="radio" id="option2" name="options">
+                    <label for="option2" class="tab-label">2. Keep the Lights On</label>
+                    <div class="tab-content">
+                        <h4 class="text-xl font-bold text-white mb-2">Keep the service running for existing users but halt all new investment and growth initiatives.</h4>
+                        <p class="text-gray-400 mb-4">This is a low-effort holding pattern that fulfills contractual obligations without further investment.</p>
+                        <ul class="space-y-3">
+                            <li class="flex items-start"><span class="text-green-400 mr-3 mt-1">&#10003;</span><div><strong class="text-white">Financial Impact:</strong> Fulfills the contractual spend with no additional investment.</div></li>
+                            <li class="flex items-start"><span class="text-yellow-400 mr-3 mt-1">&#8212;</span><div><strong class="text-white">Business Impact:</strong> Preserves the tool for the existing user base but does not address adoption issues or expand value. The narrative that it is a "tool bought for no purpose" may persist.</div></li>
+                            <li class="flex items-start"><span class="text-green-400 mr-3 mt-1">&#10003;</span><div><strong class="text-white">Resource Impact:</strong> Requires only minimal, ad-hoc support. The `ask-atolio` Slack channel and JIRA board would be closed to save monitoring time.</div></li>
+                        </ul>
+                    </div>
+
+                    <!-- Tab 3: Re-invest for ROI -->
+                    <input type="radio" id="option3" name="options">
+                    <label for="option3" class="tab-label">3. Re-invest for ROI</label>
+                    <div class="tab-content">
+                         <h4 class="text-xl font-bold text-white mb-2">For completeness, a third option is to address adoption challenges to generate a return on the committed spend.</h4>
+                        <p class="text-gray-400 mb-4">This path seeks to turn a sunk cost into a valuable asset by actively working to realize the project's original goals.</p>
+                        <ul class="space-y-3">
+                            <li class="flex items-start"><span class="text-green-400 mr-3 mt-1">&#10003;</span><div><strong class="text-white">Financial Impact:</strong> Aims to create positive business value from the mandatory $1.16M expense. Requires investment of internal team time, not additional budget.</div></li>
+                            <li class="flex items-start"><span class="text-green-400 mr-3 mt-1">&#10003;</span><div><strong class="text-white">Business Impact:</strong> Directly addresses the goals of saving time and improving productivity. Actively works to counter the negative narrative around the project's value.</div></li>
+                            <li class="flex items-start"><span class="text-green-400 mr-3 mt-1">&#10003;</span><div><strong class="text-white">Future Opportunities:</strong> Capitalizes on planned Atolio features, including API access and knowledge-scoped chatbots, enabling powerful, custom-built applications like the "Booklio" prototype.</div></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+</body>
+</html>
