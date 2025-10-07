@@ -1,0 +1,487 @@
+-----------
+title: City Map
+-----------
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Architecture City Map</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+        .tooltip {
+            position: absolute;
+            text-align: left;
+            padding: 8px 12px;
+            font: 12px sans-serif;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border: 0px;
+            border-radius: 8px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .node text {
+            pointer-events: none;
+            font-size: 10px;
+            fill: #333;
+        }
+        .group-label {
+            font-size: 18px;
+            font-weight: bold;
+            fill: #555;
+            text-anchor: middle;
+        }
+        .subgroup-label {
+            font-size: 14px;
+            font-weight: 500;
+            fill: #777;
+            text-anchor: middle;
+        }
+        .legend-color-box {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+            margin-right: 8px;
+        }
+        .guidance-list li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 8px;
+        }
+        .guidance-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #3b82f6;
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex h-screen w-screen">
+
+    <!-- Sidebar -->
+    <div class="w-1/4 max-w-sm h-full bg-white shadow-lg p-6 overflow-y-auto flex flex-col space-y-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Architecture Map</h1>
+            <p class="text-gray-500 text-sm mt-1">An interactive visualization of the application landscape.</p>
+        </div>
+        
+        <!-- Controls & Tips -->
+        <div class="p-4 bg-gray-50 rounded-lg">
+            <h3 class="font-semibold text-gray-700 mb-3">Controls & Tips</h3>
+            <ul class="guidance-list text-sm text-gray-600">
+                <li><b>Hover</b> over an application to see details and highlight it on the map.</li>
+                <li><b>Click</b> a Business Unit to filter the map and show only the applications it uses.</li>
+                <li><b>Drag</b> any application to manually rearrange the layout.</li>
+            </ul>
+        </div>
+
+        <!-- Legend -->
+        <div class="p-4 bg-gray-50 rounded-lg">
+            <h3 class="font-semibold text-gray-700 mb-3">Legend</h3>
+            <div class="space-y-3">
+                <div>
+                    <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Criticallity</h4>
+                    <div id="criticallity-legend" class="space-y-1"></div>
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Life Cycle</h4>
+                    <div id="lifecycle-legend" class="space-y-1"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Business Units -->
+        <div class="p-4 bg-gray-50 rounded-lg flex-grow">
+            <h3 class="font-semibold text-gray-700 mb-3">Business Units</h3>
+            <div id="bu-list" class="space-y-2">
+                <!-- Business units will be populated by D3 -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Main Visualization Area -->
+    <div id="visualization-container" class="flex-grow h-full relative">
+        <svg id="city-map" class="w-full h-full"></svg>
+        <div class="tooltip"></div>
+    </div>
+
+<script>
+    const width = document.getElementById('visualization-container').offsetWidth;
+    const height = document.getElementById('visualization-container').offsetHeight;
+
+    const svg = d3.select("#city-map")
+        .attr("viewBox", [0, 0, width, height]);
+
+    const tooltip = d3.select(".tooltip");
+
+    const colorScale = d3.scaleOrdinal()
+        .domain(["High", "Medium", "Low", "Unknown"])
+        .range(["#ef4444", "#f59e0b", "#10b981", "#9ca3af"]);
+
+    const lifecycleIcon = {
+        "Production": "🟢",
+        "Planned Sunset": "🔴",
+        "Test": "🟡",
+        "Unknown": "⚪️"
+    };
+
+    // Data is embedded to avoid fetch errors in this environment
+    const appsDataCsv = `Application type,Name,Application ID,Type,Criticallity,SLA,Life Cycle,Last audit date,License Cost,Operational cost,Application Owner
+WebSite,Webshop,7884,Application,Medium,Silver,Production,2017-01-01T12:48:00.000Z,12000,12000,cio@example.com
+SaaS,Hubspot CRM,7885,Application,Medium,Gold,Production,2017-01-01T12:48:00.000Z,14000,16000,cio@example.com
+On-prem,SAP ERP,7886,Application,High,Gold,Production,2017-01-01T12:48:00.000Z,200000,200000,cio@example.com
+On-prem,Logistics,7887,Application,Low,Silver,Production,2017-01-01T12:48:00.000Z,90000,50000,cio@example.com
+SaaS,Intercom,7888,Application,Low,Gold,Production,2017-01-01T12:48:00.000Z,9500,9000,cio@example.com
+WebSite,HR,7889,Application,Low,Silver,Production,2017-01-01T12:48:00.000Z,2500,2500,cio@example.com
+SaaS,LMS,7890,Application,Low,Bronze,Test,2017-01-01T12:48:00.000Z,12000,12000,cio@example.com
+On-prem,Marketing Platform,7891,Application,High,Bronze,Planned Sunset,2017-01-01T12:48:00.000Z,12000,12000,cio@example.com
+On-prem,SAP CRM,7892,Application,High,Platinum,Planned Sunset,2017-01-01T12:48:00.000Z,585000,0,cio@example.com
+PaaS,Subscription Management System,7893,Application,High,Platinum,Production,2017-01-01T12:48:00.000Z,12500,12500,cio@example.com
+None,Office365,7894,Application,Medium,Platinum,Production,2017-01-01T12:48:00.000Z,18000,14000,cio@example.com
+SaaS,Google Work,7895,Application,Medium,Platinum,Production,2017-01-01T12:48:00.000Z,14000,16000,cio@example.com
+SaaS,Slack,7896,Application,Low,Silver,Production,2017-01-01T12:48:00.000Z,2000,2500,cio@example.com
+SaaS,HipChat,7897,Application,Low,Silver,Planned Sunset,2017-01-01T12:48:00.000Z,1250,0,cio@example.com
+SaaS,InDesign,7898,Application,Low,Gold,Production,2017-01-01T12:48:00.000Z,1450,1450,cio@example.com
+SaaS,Jira,7899,Application,Medium,Gold,Production,2017-01-01T12:48:00.000Z,85000,45000,cio@example.com
+On-Prem,GitHub,7900,Application,High,Silver,Production,2017-01-01T12:48:00.000Z,225000,150000,cio@example.com
+SaaS,Hire,7901,Application,Low,Bronze,Test,2017-01-01T12:48:00.000Z,1200,1200,cio@example.com
+SaaS,Linkedin,7902,Application,Low,Silver,Production,2017-01-01T12:48:00.000Z,800,800,cio@example.com
+SaaS,Visma Accounting,7903,Application,High,Platinum,Production,2017-01-01T12:48:00.000Z,12000,12000,cio@example.com
+SaaS,Google Analytics,7904,Application,Low,Bronze,Production,2017-01-01T12:48:00.000Z,0,1500,cio@example.com
+SaaS,Google Adwords,7905,Application,Medium,Bronze,Production,2017-01-01T12:48:00.000Z,0,85000,cio@example.com`;
+
+    const buDataCsv = `Name,Location,Company Type,ID
+Norway,Oslo,AS,ACME-NO
+Sweden,Stockholm,AS,ACME-SE
+Denmark,Copenhagen,AS,ACME-DK
+UK,London,LLC,ACME-UK
+USA,New York,LLC,ACME-US`;
+
+    const capDataCsv = `Top level capabillity,Sub levle capabillity
+Enterprise Services,Finance
+Enterprise Services,HR
+Enterprise Services,Communications
+Customer Experience,Customer Engagement
+Monetization,Customer Analytics
+Monetization,Marketing
+Monetization,Sales`;
+
+    const buAppMapCsv = `BU,Application,Reference type
+ACME-NO,7884,Owns
+ACME-NO,7885,Licenses
+ACME-NO,7886,Licenses
+ACME-NO,7887,Licenses
+ACME-NO,7888,Owns
+ACME-NO,7889,Licenses
+ACME-DK,7890,Licenses
+ACME-DK,7891,Owns
+ACME-UK,7892,Owns
+ACME-US,7893,Licenses
+ACME-US,7894,Licenses
+ACME-US,7895,Licenses
+ACME-US,7896,Licenses
+ACME-SE,7897,Licenses
+ACME-NO,7898,Licenses
+ACME-NO,7899,Licenses
+ACME-NO,7900,Licenses
+ACME-NO,7901,Licenses
+ACME-NO,7902,Licenses
+ACME-NO,7903,Licenses
+ACME-NO,7904,Licenses
+ACME-NO,7905,Licenses`;
+
+    const capAppMapCsv = `Capabillity,Application,Type,Fit-for-purpose
+Enterprise Services::Finance,WebSite::Webshop,Realizes,Low
+Enterprise Services::HR,SaaS::Hubspot CRM,Realizes,Medium
+Enterprise Services::Communications,On-prem::SAP ERP,Realizes,Medium
+Customer Experience::Customer Engagement,On-prem::Logistics,Realizes,Medium
+Monetization::Customer Analytics,SaaS::Intercom,Realizes,Medium
+Monetization::Marketing,WebSite::HR,Realizes,High
+Monetization::Sales,SaaS::LMS,Realizes,High
+Enterprise Services::Finance,On-prem::Marketing Platform,Realizes,Low
+Enterprise Services::HR,On-prem::SAP CRM,Realizes,Medium
+Enterprise Services::Communications,PaaS::Subscription Management System,Realizes,Medium
+Customer Experience::Customer Engagement,None::Office365,Realizes,High
+Monetization::Customer Analytics,SaaS::Google Work,Realizes,Low
+Monetization::Marketing,SaaS::Slack,Realizes,High
+Monetization::Sales,SaaS::HipChat,Realizes,Low
+Enterprise Services::Finance,SaaS::InDesign,Realizes,Medium
+Enterprise Services::HR,SaaS::Jira,Realizes,Medium
+Enterprise Services::Communications,On-Prem::GitHub,Realizes,High
+Customer Experience::Customer Engagement,SaaS::Hire,Realizes,Low
+Monetization::Customer Analytics,SaaS::Linkedin,Realizes,Medium
+Monetization::Marketing,SaaS::Visma Accounting,Realizes,Medium
+Monetization::Sales,SaaS::Google Analytics,Realizes,Medium
+Enterprise Services::Finance,SaaS::Google Adwords,Realizes,Medium`;
+
+    try {
+        const appsData = d3.csvParse(appsDataCsv);
+        const buData = d3.csvParse(buDataCsv);
+        const capData = d3.csvParse(capDataCsv);
+        const buAppMap = d3.csvParse(buAppMapCsv);
+        const capAppMap = d3.csvParse(capAppMapCsv);
+
+        // 1. Process Data & Clean it
+        const cleanData = (data, keys) => {
+            data.forEach(d => {
+                keys.forEach(key => {
+                    if(d[key]) d[key] = d[key].trim();
+                });
+            });
+        };
+
+        cleanData(appsData, ['Application type', 'Name', 'Application ID']);
+        cleanData(buData, ['ID', 'Name']);
+        cleanData(capData, ['Top level capabillity', 'Sub levle capabillity']);
+        cleanData(buAppMap, ['BU', 'Application']);
+        cleanData(capAppMap, ['Capabillity', 'Application']);
+        
+        const appMap = new Map();
+        appsData.forEach(d => {
+            const totalCost = parseFloat(d['License Cost']) + parseFloat(d['Operational cost']);
+            d.totalCost = isNaN(totalCost) ? 10000 : totalCost;
+            const key = `${d['Application type']}::${d.Name}`;
+            appMap.set(d['Application ID'], d);
+            appMap.set(key, d);
+        });
+
+        const nestedCapabilities = {};
+        const capabilities = d3.group(capData, d => d['Top level capabillity']);
+        for (const [topLevel, subLevels] of capabilities.entries()) {
+            nestedCapabilities[topLevel] = {};
+            subLevels.forEach(sub => {
+                nestedCapabilities[topLevel][sub['Sub levle capabillity']] = { applications: [] };
+            });
+        }
+        
+        capAppMap.forEach(d => {
+            const app = appMap.get(d.Application);
+            const [topLevel, subLevel] = d.Capabillity.split('::').map(s => s.trim());
+            if (app && nestedCapabilities[topLevel] && nestedCapabilities[topLevel][subLevel]) {
+                 nestedCapabilities[topLevel][subLevel].applications.push(app);
+            } else {
+                console.warn(`Could not map application or capability:`, d);
+            }
+        });
+
+        const buMap = new Map();
+        buData.forEach(bu => buMap.set(bu.ID, { ...bu, applications: [] }));
+        buAppMap.forEach(link => {
+            const bu = buMap.get(link.BU);
+            const app = appMap.get(link.Application);
+            if(bu && app) {
+                bu.applications.push(app['Application ID']);
+            }
+        });
+
+
+        // 2. Prepare nodes for simulation
+        const nodes = [];
+        Object.entries(nestedCapabilities).forEach(([topLevel, subLevels]) => {
+            Object.entries(subLevels).forEach(([subLevel, content]) => {
+                content.applications.forEach(app => {
+                    nodes.push({
+                        ...app,
+                        id: app['Application ID'],
+                        group: topLevel,
+                        subgroup: subLevel,
+                        type: 'app'
+                    });
+                });
+            });
+        });
+        
+        // 3. Setup D3 Force Simulation
+        const simulation = d3.forceSimulation(nodes)
+            .force("charge", d3.forceManyBody().strength(-30)) // Increased repulsion
+            .force("x", d3.forceX(width / 2).strength(0.015))
+            .force("y", d3.forceY(height / 2).strength(0.015))
+            .force("collision", d3.forceCollide().radius(d => Math.sqrt(d.totalCost) / 100 + 12)); // Increased padding
+
+        const groups = [...capabilities.keys()];
+        const groupCenters = {};
+        groups.forEach((g, i) => {
+            groupCenters[g] = { x: (width / (groups.length + 1)) * (i + 1), y: height / 2 };
+        });
+
+        simulation.force("groupX", d3.forceX(d => groupCenters[d.group].x).strength(0.05));
+        simulation.force("groupY", d3.forceY(d => groupCenters[d.group].y).strength(0.05));
+
+        const hullGroup = svg.append("g");
+        const node = svg.append("g")
+            .selectAll("circle")
+            .data(nodes)
+            .join("circle")
+            .attr("class", "node")
+            .attr("r", d => Math.sqrt(d.totalCost) / 100 + 3)
+            .attr("fill", d => colorScale(d.Criticallity || "Unknown"))
+            .attr("stroke", "#fff")
+            .attr("stroke-width", 1.5)
+            .call(drag(simulation));
+
+        const groupLabels = svg.append("g");
+        
+        simulation.on("tick", () => {
+            node.attr("cx", d => d.x).attr("cy", d => d.y);
+            
+            hullGroup.selectAll("path").remove();
+            const hulls = hullGroup.selectAll("path")
+                .data(d3.groups(nodes, d => d.group));
+            
+            hulls.enter().append("path")
+                .attr("d", d => {
+                    const points = d[1].map(n => [n.x, n.y]);
+                    const hullPoints = d3.polygonHull(points);
+                    if (!hullPoints) return "";
+                    return "M" + hullPoints.join("L") + "Z";
+                })
+                .attr("fill", (d,i) => d3.schemeSet3[i % 12])
+                .attr("opacity", 0.15)
+                .attr("stroke", (d,i) => d3.schemeSet3[i % 12])
+                .attr("stroke-width", 40) // Make hull border thicker for more padding
+                .attr("stroke-linejoin", "round")
+                .lower();
+
+            groupLabels.selectAll(".group-label").remove();
+            groupLabels.selectAll(".subgroup-label").remove();
+            
+            const groupCentroids = d3.rollup(nodes, v => [d3.mean(v, d => d.x), d3.mean(v, d => d.y)], d => d.group);
+            groupCentroids.forEach((pos, name) => {
+                groupLabels.append("text")
+                    .attr("class", "group-label")
+                    .attr("x", pos[0])
+                    .attr("y", d3.min(nodes.filter(n => n.group === name), n => n.y) - 60) // Position above the group
+                    .text(name);
+            });
+
+            const subgroupCentroids = d3.rollup(nodes, v => [d3.mean(v, d => d.x), d3.mean(v, d => d.y)], d => d.group, d => d.subgroup);
+            subgroupCentroids.forEach(subgroups => {
+                subgroups.forEach((pos, name) => {
+                     groupLabels.append("text")
+                        .attr("class", "subgroup-label")
+                        .attr("x", pos[0])
+                        .attr("y", d3.max(nodes.filter(n => n.subgroup === name), n => n.y) + 30) // Position below the subgroup
+                        .text(name);
+                });
+            });
+        });
+
+        // 4. Interactivity
+        node.on("mouseover", (event, d) => {
+            tooltip.transition().duration(200).style("opacity", .9);
+            const costFormat = d3.format("$,.0f");
+            tooltip.html(
+                `<div class="font-bold text-base">${d.Name} ${lifecycleIcon[d['Life Cycle'] || 'Unknown']}</div>` +
+                `<strong>Type:</strong> ${d['Application type']}<br/>` +
+                `<strong>Criticallity:</strong> ${d.Criticallity}<br/>` +
+                `<strong>SLA:</strong> ${d.SLA}<br/>` +
+                `<strong>Total Cost:</strong> ${costFormat(d.totalCost)}<br/>` +
+                `<strong>Owner:</strong> ${d['Application Owner']}`
+            ).style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 28) + "px");
+
+            // Only highlight if not already part of a faded group
+            if (d3.select(event.currentTarget).style('opacity') > 0.1) {
+                 node.transition().duration(100).style("opacity", n => n.id === d.id ? 1.0 : 0.1); // Intensified fade
+            }
+        }).on("mouseout", () => {
+            tooltip.transition().duration(500).style("opacity", 0);
+             if (!selectedBU) {
+                 node.transition().duration(200).style("opacity", 1.0);
+             } else {
+                 const buApps = buMap.get(selectedBU).applications;
+                 node.transition().duration(200).style("opacity", n => buApps.includes(n.id) ? 1.0 : 0.1);
+             }
+        });
+        
+        let selectedBU = null;
+        const buListContainer = d3.select("#bu-list");
+        buListContainer.selectAll("div")
+            .data(buData)
+            .join("div")
+            .attr("class", "p-2 rounded-md hover:bg-blue-100 cursor-pointer text-sm text-gray-600")
+            .text(d => `${d.Name} (${d.Location})`)
+            .on("click", (event, d_clicked) => {
+                if (selectedBU === d_clicked.ID) {
+                    selectedBU = null;
+                    d3.select(event.currentTarget).classed("bg-blue-200 font-semibold", false);
+                    node.transition().duration(200).style("opacity", 1.0);
+                } else {
+                    selectedBU = d_clicked.ID;
+                    buListContainer.selectAll("div").classed("bg-blue-200 font-semibold", d => d.ID === selectedBU);
+                    const buApps = buMap.get(selectedBU).applications;
+                    node.transition().duration(200).style("opacity", n => buApps.includes(n.id) ? 1.0 : 0.1);
+                }
+            });
+
+        // 5. Legend Population
+        const criticallityLegend = d3.select("#criticallity-legend");
+        colorScale.domain().forEach(level => {
+            const legendItem = criticallityLegend.append("div").attr("class", "flex items-center");
+            legendItem.append("div")
+                .attr("class", "legend-color-box")
+                .style("background-color", colorScale(level));
+            legendItem.append("span").attr("class", "text-sm text-gray-600").text(level);
+        });
+
+        const lifecycleLegend = d3.select("#lifecycle-legend");
+        Object.entries(lifecycleIcon).forEach(([level, icon]) => {
+            if (level === "Unknown") return;
+            const legendItem = lifecycleLegend.append("div").attr("class", "flex items-center");
+            legendItem.append("span").attr("class", "mr-2").text(icon);
+            legendItem.append("span").attr("class", "text-sm text-gray-600").text(level);
+        });
+
+    } catch (error) {
+        console.error("Error processing data:", error);
+        d3.select("#visualization-container").html(
+            `<div class="flex items-center justify-center h-full">
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold text-red-600">Failed to Load or Parse Data</h2>
+                    <p class="text-gray-500">Please check the console for errors and ensure the data format is correct.</p>
+                </div>
+            </div>`
+        );
+    }
+
+    // Drag functionality for nodes
+    function drag(simulation) {
+        function dragstarted(event) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            event.subject.fx = event.subject.x;
+            event.subject.fy = event.subject.y;
+        }
+
+        function dragged(event) {
+            event.subject.fx = event.x;
+            event.subject.fy = event.y;
+        }
+
+        function dragended(event) {
+            if (!event.active) simulation.alphaTarget(0);
+            event.subject.fx = null;
+            event.subject.fy = null;
+        }
+
+        return d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended);
+    }
+</script>
+
+</body>
+</html>
+
