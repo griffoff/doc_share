@@ -21,7 +21,7 @@ title: Atolio Status Dashboard
         .card {
             background-color: #1F2937; /* Tailwind gray-800 */
             border: 1px solid #374151; /* Tailwind gray-700 */
-            transition: border-color 0.3s;
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
         .status-dot {
             width: 10px;
@@ -41,6 +41,13 @@ title: Atolio Status Dashboard
         details > summary::-webkit-details-marker {
             display: none;
         }
+        .tab-button {
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .tab-button.active {
+            background-color: #3B82F6; /* blue-500 */
+            color: white;
+        }
     </style>
 </head>
 <body class="text-gray-200 p-4 sm:p-6 md:p-8">
@@ -48,105 +55,91 @@ title: Atolio Status Dashboard
 <div class="max-w-7xl mx-auto space-y-6">
     <!-- Header -->
     <header class="text-center">
-        <h1 class="text-3xl sm:text-4xl font-bold text-white">Atolio System Health Dashboard</h1>
-        <p class="text-gray-400 mt-2">Paste inspection JSON below to dynamically update the dashboard.</p>
+        <h1 class="text-3xl sm:text-4xl font-bold text-white">Atolio System Dashboard</h1>
+        <p class="text-gray-400 mt-2">System health and connector setup overview.</p>
     </header>
 
-    <!-- JSON Input Card -->
-    <div class="card rounded-lg p-6">
-        <h2 class="text-xl font-semibold text-white mb-4">JSON Input</h2>
-        <textarea id="jsonInput" placeholder="Paste Atolio inspection JSON here..." class="w-full h-40 bg-gray-900 border border-gray-600 rounded-md p-3 text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
-        <div id="errorMessage" class="hidden mt-4 text-center text-red-400 bg-red-900/50 border border-red-500 rounded-md p-3"></div>
+    <!-- Tabs -->
+    <div class="flex space-x-2 border-b border-gray-700">
+        <button id="healthTabBtn" class="tab-button active text-gray-300 py-2 px-4 rounded-t-md">Health Dashboard</button>
+        <button id="connectorTabBtn" class="tab-button text-gray-300 py-2 px-4 rounded-t-md">Connector Setup</button>
     </div>
-    
-    <!-- Main Dashboard Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Overall Health -->
-        <div id="healthCard" class="card rounded-lg p-6 lg:col-span-3">
-            <div class="flex items-center justify-between">
-                <h2 class="text-xl font-semibold text-white">Overall System Health</h2>
-                <div id="statusIndicator" class="status-indicator bg-gray-600"></div>
-            </div>
-            <p id="statusMessage" class="text-gray-400 mt-2">Awaiting data...</p>
-            <details id="issuesDetails" class="mt-4 hidden">
-                <summary id="issuesSummary" class="cursor-pointer text-blue-400 hover:underline">View Issues</summary>
-                <ul id="issuesList" class="list-disc pl-6 mt-2 space-y-1 text-yellow-300">
-                    <!-- Issues will be populated here -->
-                </ul>
-            </details>
-        </div>
 
-        <!-- Data Freshness -->
-        <div id="freshnessCard" class="card rounded-lg p-6 lg:col-span-2">
-            <h2 class="text-xl font-semibold text-white mb-4">Data Freshness & Connectors</h2>
-            <table class="w-full text-left" id="freshnessTable">
-                <thead>
-                    <tr class="border-b border-gray-700">
-                        <th class="py-2 text-gray-400 font-semibold">Source</th>
-                        <th class="py-2 text-gray-400 font-semibold">Last Update</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td colspan="2" class="py-4 text-gray-500">Awaiting data...</td></tr>
-                </tbody>
-            </table>
+    <!-- Health Dashboard Content -->
+    <div id="health-dashboard-content">
+        <!-- JSON Input Card -->
+        <div class="card rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-white mb-4">Health Inspection JSON</h2>
+            <textarea id="jsonInput" placeholder="Paste Atolio inspection JSON here..." class="w-full h-40 bg-gray-900 border border-gray-600 rounded-md p-3 text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+            <div id="errorMessage" class="hidden mt-4 text-center text-red-400 bg-red-900/50 border border-red-500 rounded-md p-3"></div>
         </div>
         
-        <!-- Data Scope -->
-        <div id="scopeCard" class="card rounded-lg p-6 flex flex-col justify-center">
-            <h2 class="text-xl font-semibold text-white mb-4">Data Scope</h2>
-            <div class="space-y-4 text-center">
-                <div>
-                    <div id="totalDocs" class="text-3xl font-bold text-blue-400">--</div>
-                    <div class="text-sm text-gray-400">Total Documents</div>
+        <!-- Main Dashboard Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Overall Health -->
+            <div id="healthCard" class="card rounded-lg p-6 lg:col-span-3">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-semibold text-white">Overall System Health</h2>
+                    <div id="statusIndicator" class="status-indicator bg-gray-600"></div>
                 </div>
-                <div>
-                    <div id="userDocs" class="text-3xl font-bold text-green-400">--</div>
-                    <div class="text-sm text-gray-400">User Accessible Docs</div>
-                </div>
-                <div>
-                    <div id="totalUsers" class="text-3xl font-bold text-purple-400">--</div>
-                    <div class="text-sm text-gray-400">Total Users</div>
+                <p id="statusMessage" class="text-gray-400 mt-2">Awaiting data...</p>
+                <details id="issuesDetails" class="mt-4 hidden">
+                    <summary id="issuesSummary" class="cursor-pointer text-blue-400 hover:underline">View Issues</summary>
+                    <ul id="issuesList" class="list-disc pl-6 mt-2 space-y-1 text-yellow-300"></ul>
+                </details>
+            </div>
+            <!-- Data Freshness -->
+            <div id="freshnessCard" class="card rounded-lg p-6 lg:col-span-2">
+                <h2 class="text-xl font-semibold text-white mb-4">Data Freshness & Connectors</h2>
+                <table class="w-full text-left" id="freshnessTable">
+                    <thead><tr class="border-b border-gray-700"><th class="py-2 text-gray-400 font-semibold">Source</th><th class="py-2 text-gray-400 font-semibold">Last Update</th></tr></thead>
+                    <tbody><tr><td colspan="2" class="py-4 text-gray-500">Awaiting data...</td></tr></tbody>
+                </table>
+            </div>
+            <!-- Data Scope -->
+            <div id="scopeCard" class="card rounded-lg p-6 flex flex-col justify-center">
+                <h2 class="text-xl font-semibold text-white mb-4">Data Scope</h2>
+                <div class="space-y-4 text-center">
+                    <div><div id="totalDocs" class="text-3xl font-bold text-blue-400">--</div><div class="text-sm text-gray-400">Total Documents</div></div>
+                    <div><div id="userDocs" class="text-3xl font-bold text-green-400">--</div><div class="text-sm text-gray-400">User Accessible Docs</div></div>
+                    <div><div id="totalUsers" class="text-3xl font-bold text-purple-400">--</div><div class="text-sm text-gray-400">Total Users</div></div>
                 </div>
             </div>
-        </div>
-
-        <!-- Storage & Memory Usage -->
-        <div id="storageCard" class="card rounded-lg p-6 lg:col-span-2">
-            <h2 class="text-xl font-semibold text-white mb-4">Storage & Memory Usage</h2>
-            <table class="w-full text-left" id="usageTable">
-                <thead>
-                    <tr class="border-b border-gray-700">
-                        <th class="py-2 text-gray-400 font-semibold">Data Type</th>
-                        <th class="py-2 text-gray-400 font-semibold">Disk Usage</th>
-                        <th class="py-2 text-gray-400 font-semibold">Memory Usage</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td colspan="3" class="py-4 text-gray-500">Awaiting data...</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Search Performance -->
-        <div id="performanceCard" class="card rounded-lg p-6 flex flex-col justify-center">
-             <h2 class="text-xl font-semibold text-white mb-4">Search Performance</h2>
-             <div class="space-y-4 text-center">
-                <div>
-                    <div class="text-3xl font-bold text-red-400"><span id="slowestQuery">--</span>s</div>
-                    <div class="text-sm text-gray-400">Slowest Query</div>
-                </div>
-                 <div>
-                    <div class="text-3xl font-bold text-green-400"><span id="fastestQuery">--</span>s</div>
-                    <div class="text-sm text-gray-400">Fastest Query</div>
-                </div>
-             </div>
+            <!-- Storage & Memory Usage -->
+            <div id="storageCard" class="card rounded-lg p-6 lg:col-span-2">
+                <h2 class="text-xl font-semibold text-white mb-4">Storage & Memory Usage</h2>
+                <table class="w-full text-left" id="usageTable">
+                    <thead><tr class="border-b border-gray-700"><th class="py-2 text-gray-400 font-semibold">Data Type</th><th class="py-2 text-gray-400 font-semibold">Disk Usage</th><th class="py-2 text-gray-400 font-semibold">Memory Usage</th></tr></thead>
+                    <tbody><tr><td colspan="3" class="py-4 text-gray-500">Awaiting data...</td></tr></tbody>
+                </table>
+            </div>
+            <!-- Search Performance -->
+            <div id="performanceCard" class="card rounded-lg p-6 flex flex-col justify-center">
+                 <h2 class="text-xl font-semibold text-white mb-4">Search Performance</h2>
+                 <div class="space-y-4 text-center">
+                    <div><div class="text-3xl font-bold text-red-400"><span id="slowestQuery">--</span>s</div><div class="text-sm text-gray-400">Slowest Query</div></div>
+                     <div><div class="text-3xl font-bold text-green-400"><span id="fastestQuery">--</span>s</div><div class="text-sm text-gray-400">Fastest Query</div></div>
+                 </div>
+            </div>
         </div>
     </div>
+
+    <!-- Connector Setup Content -->
+    <div id="connector-setup-content" class="hidden">
+        <div class="card rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-white mb-4">Connector Configuration JSON</h2>
+            <textarea id="connectorJsonInput" placeholder="Paste connector configuration JSON here..." class="w-full h-40 bg-gray-900 border border-gray-600 rounded-md p-3 text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+            <div id="connectorErrorMessage" class="hidden mt-4 text-center text-red-400 bg-red-900/50 border border-red-500 rounded-md p-3"></div>
+        </div>
+        <div id="connectorCardsContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <!-- Connector cards will be inserted here -->
+        </div>
+    </div>
+
 </div>
 
 <script>
-    // Initial JSON data to pre-populate the dashboard
+    // Initial JSON data for Health Dashboard
     const initialJson = `{
         "message": "inspection completed successfully",
         "inspection": {
@@ -159,11 +152,19 @@ title: Atolio Status Dashboard
             "timings": { "queryCollabs3yForUser": { "searchtime": 0.583 }, "queryCollabs90dForUser": { "searchtime": 0.553 }, "queryRecentCoredocsForUser": { "searchtime": 0.631 }, "queryWordHybridCoredocsForUser": { "searchtime": 0.807 }, "queryWordLexicalCoredocsForUser": { "searchtime": 1.882 }, "sourceStatsGlobal": { "searchtime": 0.276 }, "sourceStatsUser": { "searchtime": 0.281 } }
         }
     }`;
+    // Initial JSON data for Connector Setup - now includes full configuration for details
+    const initialConnectorJson = `[{"connector":"confluencedc","instance":"default","source":"confluencedc","enabled":true,"rendezvousCompleted":true,"identityProvider":false,"status":{"state":"Unknown","errorMessage":"","validationReport":null},"specification":{"displayName":"Confluence DC"}},{"connector":"jiradc","instance":"default","source":"jiradc","enabled":true,"rendezvousCompleted":true,"identityProvider":false,"status":{"state":"Unknown","errorMessage":"","validationReport":null},"specification":{"displayName":"Jira DC"}},{"connector":"microsoft","instance":"default","source":"entraid","enabled":true,"rendezvousCompleted":true,"identityProvider":true,"status":{"state":"Running","errorMessage":"","validationReport":{"valid":true}},"specification":{"displayName":"Entra ID"}},{"connector":"microsoft","instance":"default","source":"outlook","enabled":true,"rendezvousCompleted":true,"identityProvider":false,"configuration":{"knownDomains":["cengage.com"]},"status":{"state":"Running","errorMessage":"","validationReport":{"valid":true}},"specification":{"displayName":"Outlook"}},{"connector":"microsoft","instance":"default","source":"sharepoint","enabled":true,"rendezvousCompleted":true,"identityProvider":false,"configuration":{"resources":{"site":{"included":["https://cengageo365.sharepoint.com/sites/ServiceNowSAMPro","https://cengageo365.sharepoint.com/sites/CIS","https://cengageo365.sharepoint.com/sites/CPIPilotProgram","https://cengageo365.sharepoint.com/sites/strategic-sourcing","https://cengageo365.sharepoint.com/sites/VIP","https://cengageo365.sharepoint.com/sites/MAST","https://cengageo365.sharepoint.com/sites/GaleSales/","https://cengageo365.sharepoint.com/sites/ThorndikeLeadershipTeam/","https://cengageo365.sharepoint.com/sites/Onboarding","https://cengageo365.sharepoint.com/sites/CengageGroupResearch/","https://cengageo365.sharepoint.com/sites/technologyresourcehub","https://cengageo365.sharepoint.com/sites/SalesEnablement","https://cengageo365.sharepoint.com/sites/foundationforfuture","https://cengageo365.sharepoint.com/sites/connect","https://cengageo365.sharepoint.com/sites/NGLK12Marketing","https://cengageo365.sharepoint.com/sites/RFPTeam","https://cengageo365.sharepoint.com/sites/ed2go-ProductManagement","https://cengageo365.sharepoint.com/sites/ed2goResourceCenter"]}}},"status":{"state":"Running","errorMessage":"","validationReport":{"valid":true}},"specification":{"displayName":"SharePoint"}},{"connector":"microsoft","instance":"default","source":"teams","enabled":true,"rendezvousCompleted":true,"identityProvider":false,"status":{"state":"Running","errorMessage":"","validationReport":{"valid":true}},"specification":{"displayName":"Teams"}},{"connector":"okta","instance":"default","source":"okta","enabled":true,"rendezvousCompleted":true,"identityProvider":false,"status":{"state":"Running","errorMessage":"","validationReport":{"valid":true}},"specification":{"displayName":"Okta"}},{"connector":"salesforce","instance":"default","source":"salesforce","enabled":true,"rendezvousCompleted":true,"identityProvider":false,"configuration":{"excludedResourceTypes":["Report"]},"status":{"state":"Running","errorMessage":"","validationReport":{"valid":true}},"specification":{"displayName":"Salesforce"}},{"connector":"servicenow","instance":"default","source":"servicenow","enabled":false,"rendezvousCompleted":true,"identityProvider":false,"status":{"state":"Misconfigured","errorMessage":"","validationReport":{"valid":false,"errors":[{"description":"Credentials invalid","error":"validate connector role: no user sys_id found"}]}},"specification":{"displayName":"ServiceNow"}},{"connector":"slack","instance":"default","source":"slack","enabled":true,"rendezvousCompleted":true,"identityProvider":false,"status":{"state":"Running","errorMessage":"","validationReport":{"valid":true}},"specification":{"displayName":"Slack"}},{"connector":"web","instance":"blogs","source":"web","enabled":true,"rendezvousCompleted":true,"identityProvider":false,"status":{"state":"Running","errorMessage":"","validationReport":{"valid":true}},"specification":{"displayName":"Web"}},{"connector":"web","instance":"help","source":"web","enabled":true,"rendezvousCompleted":true,"identityProvider":false,"status":{"state":"Running","errorMessage":"","validationReport":{"valid":true}},"specification":{"displayName":"Web"}},{"connector":"web","instance":"styleguide","source":"web","enabled":true,"rendezvousCompleted":true,"identityProvider":false,"status":{"state":"Running","errorMessage":"","validationReport":{"valid":true}},"specification":{"displayName":"Web"}},{"connector":"zendesk","instance":"default","source":"zendesk","enabled":true,"rendezvousCompleted":true,"identityProvider":false,"status":{"state":"Running","errorMessage":"","validationReport":{"valid":true}},"specification":{"displayName":"Zendesk"}}]`;
 
     // DOM Elements
     const jsonInputEl = document.getElementById('jsonInput');
     const errorMessageEl = document.getElementById('errorMessage');
     const cardIds = ['freshnessCard', 'scopeCard', 'storageCard', 'performanceCard'];
+    const connectorJsonInputEl = document.getElementById('connectorJsonInput');
+    const connectorErrorMessageEl = document.getElementById('connectorErrorMessage');
+    const healthTabBtn = document.getElementById('healthTabBtn');
+    const connectorTabBtn = document.getElementById('connectorTabBtn');
+    const healthDashboardContent = document.getElementById('health-dashboard-content');
+    const connectorSetupContent = document.getElementById('connector-setup-content');
 
     // HELPER FUNCTIONS
     const formatBytes = (bytes, decimals = 2) => {
@@ -194,57 +195,43 @@ title: Atolio Status Dashboard
         return Math.floor(seconds) + " seconds ago";
     };
 
-    // MAIN DASHBOARD UPDATE FUNCTION
-    function updateDashboard(jsonString) {
+    // DASHBOARD UPDATE FUNCTIONS
+    function updateHealthDashboard(jsonString) {
         try {
             const data = JSON.parse(jsonString);
-            if (!data.inspection) {
-                throw new Error("Invalid data structure: 'inspection' object not found.");
-            }
+            if (!data.inspection) throw new Error("Invalid data structure: 'inspection' object not found.");
             const inspection = data.inspection;
             errorMessageEl.classList.add('hidden');
-
             let problems = [];
-
-            // Reset highlights
             cardIds.forEach(id => document.getElementById(id).classList.remove('border-yellow-500', 'border-2'));
 
-            // 1. Data Freshness check
             const freshnessBody = document.querySelector('#freshnessTable tbody');
             freshnessBody.innerHTML = '';
-            const sortedSources = inspection.sourceStatsGlobal.sort((a, b) => new Date(b.newest) - new Date(a.newest));
-            
-            sortedSources.forEach(source => {
+            inspection.sourceStatsGlobal.sort((a, b) => new Date(b.newest) - new Date(a.newest)).forEach(source => {
                 const row = document.createElement('tr');
-                const lastUpdate = new Date(source.newest);
-                const hoursSinceUpdate = (new Date('2025-10-10T19:20:00Z') - lastUpdate) / (1000 * 60 * 60);
-                
+                const hoursSinceUpdate = (new Date('2025-10-10T19:20:00Z') - new Date(source.newest)) / 36e5;
                 let statusColor = 'bg-green-500';
                 if (hoursSinceUpdate > 48) {
                     statusColor = 'bg-red-500';
-                    problems.push({ text: `${source.name} data is stale (over 48 hours old).`, link: '#freshnessCard' });
+                    problems.push({ text: `${source.name} data is stale (> 48 hours).`, link: '#freshnessCard' });
                     row.classList.add('bg-red-500/10');
                 } else if (hoursSinceUpdate > 24) {
                     statusColor = 'bg-yellow-500';
-                    problems.push({ text: `${source.name} data is over 24 hours old.`, link: '#freshnessCard' });
+                    problems.push({ text: `${source.name} data is aging (> 24 hours).`, link: '#freshnessCard' });
                     row.classList.add('bg-yellow-500/10');
                 }
-                
                 row.innerHTML = `<td class="py-3 border-b border-gray-700"><div class="flex items-center gap-3"><div class="status-dot ${statusColor}"></div><span>${source.name}</span></div></td><td class="py-3 border-b border-gray-700 text-gray-400">${timeAgo(source.newest)}</td>`;
                 freshnessBody.appendChild(row);
             });
-            if (problems.some(p => p.link === '#freshnessCard')) {
-                 document.getElementById('freshnessCard').classList.add('border-yellow-500', 'border-2');
-            }
+            if (problems.some(p => p.link === '#freshnessCard')) document.getElementById('freshnessCard').classList.add('border-yellow-500', 'border-2');
 
-            // 2. Performance check
             const timings = Object.values(inspection.timings || {}).map(t => t.searchtime).filter(Boolean);
             if (timings.length > 0) {
                 const slowestTime = Math.max(...timings);
                 document.getElementById('slowestQuery').textContent = slowestTime.toFixed(3);
                 document.getElementById('fastestQuery').textContent = Math.min(...timings).toFixed(3);
                 if (slowestTime > 1.5) {
-                    problems.push({ text: `Slowest query took ${slowestTime.toFixed(3)}s (threshold: 1.5s).`, link: '#performanceCard' });
+                    problems.push({ text: `Slowest query took ${slowestTime.toFixed(3)}s.`, link: '#performanceCard' });
                     document.getElementById('performanceCard').classList.add('border-yellow-500', 'border-2');
                 }
             } else {
@@ -252,42 +239,31 @@ title: Atolio Status Dashboard
                  document.getElementById('fastestQuery').textContent = '--';
             }
             
-            // 3. Data Scope check
             const userDocsCount = inspection.doctypeCountsUser?.coredoc || 0;
             if (userDocsCount === 0) {
-                problems.push({ text: 'The inspected user has no accessible documents.', link: '#scopeCard' });
+                problems.push({ text: 'Inspected user has no accessible documents.', link: '#scopeCard' });
                 document.getElementById('scopeCard').classList.add('border-yellow-500', 'border-2');
             }
 
-            // 4. Update Overall Health based on problems
             const statusIndicator = document.getElementById('statusIndicator');
             const statusMessage = document.getElementById('statusMessage');
             const issuesDetails = document.getElementById('issuesDetails');
             const issuesList = document.getElementById('issuesList');
             const issuesSummary = document.getElementById('issuesSummary');
-
-            statusIndicator.className = 'status-indicator'; // Reset
+            statusIndicator.className = 'status-indicator';
             if (problems.length > 0) {
                 statusIndicator.classList.add('bg-yellow-500');
                 statusMessage.textContent = `Inspection completed with ${problems.length} potential issue(s).`;
                 issuesSummary.textContent = `View ${problems.length} Issue(s)`;
-                issuesList.innerHTML = '';
-                problems.forEach(p => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `<a href="${p.link}" class="hover:underline">${p.text}</a>`;
-                    issuesList.appendChild(li);
-                });
+                issuesList.innerHTML = problems.map(p => `<li><a href="${p.link}" class="hover:underline">${p.text}</a></li>`).join('');
                 issuesDetails.classList.remove('hidden');
                 issuesDetails.open = true;
             } else {
                 statusIndicator.classList.add('bg-green-500');
                 statusMessage.textContent = data.message;
                 issuesDetails.classList.add('hidden');
-                issuesDetails.open = false;
             }
 
-            // 5. Update other cards
-            // Resource Usage
             const usage = {};
             (inspection.vespaMetrics || []).forEach(metric => {
                 const type = (metric.dimensions.documenttype || 'unknown').replace(/_/g, ' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase());
@@ -296,38 +272,105 @@ title: Atolio Status Dashboard
                 else if (metric.key.includes('memory_usage')) usage[type].memory += metric.value;
             });
             const usageBody = document.querySelector('#usageTable tbody');
-            usageBody.innerHTML = '';
-            const sortedUsage = Object.entries(usage).sort(([, a], [, b]) => b.disk - a.disk);
-            sortedUsage.forEach(([type, values]) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `<td class="py-3 border-b border-gray-700">${type}</td><td class="py-3 border-b border-gray-700">${formatBytes(values.disk)}</td><td class="py-3 border-b border-gray-700">${formatBytes(values.memory)}</td>`;
-                usageBody.appendChild(row);
-            });
+            usageBody.innerHTML = Object.entries(usage).sort(([, a], [, b]) => b.disk - a.disk).map(([type, values]) => `<tr><td class="py-3 border-b border-gray-700">${type}</td><td class="py-3 border-b border-gray-700">${formatBytes(values.disk)}</td><td class="py-3 border-b border-gray-700">${formatBytes(values.memory)}</td></tr>`).join('');
 
-            // Data Scope
             document.getElementById('totalDocs').textContent = (inspection.doctypeCountsGlobal?.coredoc || 0).toLocaleString();
             document.getElementById('userDocs').textContent = userDocsCount.toLocaleString();
             document.getElementById('totalUsers').textContent = (inspection.doctypeCountsGlobal?.user || 0).toLocaleString();
-
         } catch (error) {
             errorMessageEl.textContent = `Error parsing JSON: ${error.message}`;
             errorMessageEl.classList.remove('hidden');
-            console.error(error);
+        }
+    }
+
+    function updateConnectorsDashboard(jsonString) {
+        try {
+            const connectors = JSON.parse(jsonString);
+            if (!Array.isArray(connectors)) throw new Error("Input is not a JSON array.");
+            
+            const container = document.getElementById('connectorCardsContainer');
+            container.innerHTML = '';
+            connectorErrorMessageEl.classList.add('hidden');
+
+            connectors.forEach(conn => {
+                const state = conn.status?.state || 'N/A';
+                const isValid = conn.status?.validationReport?.valid;
+                let statusColor = 'bg-gray-500';
+                let statusText = state;
+
+                if(state.toLowerCase() === 'running') statusColor = 'bg-green-500';
+                if(state.toLowerCase() === 'misconfigured' || isValid === false) {
+                    statusColor = 'bg-red-500';
+                    statusText = 'Error';
+                }
+                if(state.toLowerCase() === 'unknown') statusColor = 'bg-yellow-500';
+                if(!conn.enabled) statusColor = 'bg-gray-600';
+
+                const errors = conn.status?.validationReport?.errors?.map(e => `<p class="mt-1 text-xs text-red-300">${e.description}: ${e.error}</p>`).join('') || '';
+
+                let extraDetails = '';
+                if (conn.source === 'sharepoint' && conn.configuration?.resources?.site?.included?.length > 0) {
+                    const sites = conn.configuration.resources.site.included;
+                    extraDetails = `<details class="mt-2"><summary class="cursor-pointer text-xs text-blue-400 hover:underline">Show ${sites.length} indexed sites</summary><ul class="list-disc pl-5 mt-1 text-xs text-gray-400 max-h-32 overflow-y-auto">${sites.map(site => `<li>${site.split('/sites/')[1] || site}</li>`).join('')}</ul></details>`;
+                } else if (conn.source === 'salesforce' && conn.configuration?.excludedResourceTypes?.length > 0) {
+                     extraDetails = `<p class="text-xs text-gray-400 mt-2"><strong>Excluding:</strong> ${conn.configuration.excludedResourceTypes.join(', ')}</p>`;
+                } else if (conn.source === 'outlook' && conn.configuration?.knownDomains?.length > 0) {
+                    extraDetails = `<p class="text-xs text-gray-400 mt-2"><strong>Domains:</strong> ${conn.configuration.knownDomains.join(', ')}</p>`;
+                }
+
+
+                const card = `
+                    <div class="card rounded-lg p-4 flex flex-col space-y-3 ${!conn.enabled ? 'opacity-60' : ''} ${isValid === false ? 'border-red-500 border-2' : ''}">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-lg text-white">${conn.specification?.displayName} <span class="text-sm font-light text-gray-400">(${conn.instance})</span></h3>
+                            <span class="text-xs font-semibold ${statusColor} text-white px-2 py-1 rounded-full">${statusText}</span>
+                        </div>
+                        <div class="text-sm text-gray-400 space-y-1">
+                           <p><strong>Enabled:</strong> <span class="${conn.enabled ? 'text-green-400' : 'text-gray-500'}">${conn.enabled}</span></p>
+                           <p><strong>Identity Provider:</strong> ${conn.identityProvider}</p>
+                        </div>
+                        ${extraDetails}
+                        ${errors ? `<div class="bg-red-900/50 p-2 rounded-md">${errors}</div>` : ''}
+                    </div>
+                `;
+                container.innerHTML += card;
+            });
+
+        } catch(error) {
+            connectorErrorMessageEl.textContent = `Error parsing JSON: ${error.message}`;
+            connectorErrorMessageEl.classList.remove('hidden');
+        }
+    }
+
+    // TAB SWITCHING LOGIC
+    function switchTab(tab) {
+        if (tab === 'health') {
+            healthTabBtn.classList.add('active');
+            connectorTabBtn.classList.remove('active');
+            healthDashboardContent.classList.remove('hidden');
+            connectorSetupContent.classList.add('hidden');
+        } else {
+            healthTabBtn.classList.remove('active');
+            connectorTabBtn.classList.add('active');
+            healthDashboardContent.classList.add('hidden');
+            connectorSetupContent.classList.remove('hidden');
         }
     }
 
     // EVENT LISTENERS
-    jsonInputEl.addEventListener('input', (e) => {
-        if (e.target.value) {
-            updateDashboard(e.target.value);
-        }
-    });
+    jsonInputEl.addEventListener('input', (e) => updateHealthDashboard(e.target.value));
+    connectorJsonInputEl.addEventListener('input', (e) => updateConnectorsDashboard(e.target.value));
+    healthTabBtn.addEventListener('click', () => switchTab('health'));
+    connectorTabBtn.addEventListener('click', () => switchTab('connector'));
 
     // INITIAL LOAD
     window.addEventListener('DOMContentLoaded', () => {
         try {
             jsonInputEl.value = JSON.stringify(JSON.parse(initialJson), null, 2);
-            updateDashboard(initialJson);
+            updateHealthDashboard(initialJson);
+            
+            connectorJsonInputEl.value = JSON.stringify(JSON.parse(initialConnectorJson), null, 2);
+            updateConnectorsDashboard(initialConnectorJson);
         } catch (e) {
             console.error("Error with initial JSON data:", e);
         }
