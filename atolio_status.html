@@ -1,0 +1,339 @@
+---
+title: Atolio Status Dashboard
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atolio System Health Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* Tailwind gray-900 */
+        }
+        .card {
+            background-color: #1F2937; /* Tailwind gray-800 */
+            border: 1px solid #374151; /* Tailwind gray-700 */
+            transition: border-color 0.3s;
+        }
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .status-indicator {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            transition: background-color 0.3s ease-in-out;
+        }
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+    </style>
+</head>
+<body class="text-gray-200 p-4 sm:p-6 md:p-8">
+
+<div class="max-w-7xl mx-auto space-y-6">
+    <!-- Header -->
+    <header class="text-center">
+        <h1 class="text-3xl sm:text-4xl font-bold text-white">Atolio System Health Dashboard</h1>
+        <p class="text-gray-400 mt-2">Paste inspection JSON below to dynamically update the dashboard.</p>
+    </header>
+
+    <!-- JSON Input Card -->
+    <div class="card rounded-lg p-6">
+        <h2 class="text-xl font-semibold text-white mb-4">JSON Input</h2>
+        <textarea id="jsonInput" placeholder="Paste Atolio inspection JSON here..." class="w-full h-40 bg-gray-900 border border-gray-600 rounded-md p-3 text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+        <div id="errorMessage" class="hidden mt-4 text-center text-red-400 bg-red-900/50 border border-red-500 rounded-md p-3"></div>
+    </div>
+    
+    <!-- Main Dashboard Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Overall Health -->
+        <div id="healthCard" class="card rounded-lg p-6 lg:col-span-3">
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-semibold text-white">Overall System Health</h2>
+                <div id="statusIndicator" class="status-indicator bg-gray-600"></div>
+            </div>
+            <p id="statusMessage" class="text-gray-400 mt-2">Awaiting data...</p>
+            <details id="issuesDetails" class="mt-4 hidden">
+                <summary id="issuesSummary" class="cursor-pointer text-blue-400 hover:underline">View Issues</summary>
+                <ul id="issuesList" class="list-disc pl-6 mt-2 space-y-1 text-yellow-300">
+                    <!-- Issues will be populated here -->
+                </ul>
+            </details>
+        </div>
+
+        <!-- Data Freshness -->
+        <div id="freshnessCard" class="card rounded-lg p-6 lg:col-span-2">
+            <h2 class="text-xl font-semibold text-white mb-4">Data Freshness & Connectors</h2>
+            <table class="w-full text-left" id="freshnessTable">
+                <thead>
+                    <tr class="border-b border-gray-700">
+                        <th class="py-2 text-gray-400 font-semibold">Source</th>
+                        <th class="py-2 text-gray-400 font-semibold">Last Update</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="2" class="py-4 text-gray-500">Awaiting data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Data Scope -->
+        <div id="scopeCard" class="card rounded-lg p-6 flex flex-col justify-center">
+            <h2 class="text-xl font-semibold text-white mb-4">Data Scope</h2>
+            <div class="space-y-4 text-center">
+                <div>
+                    <div id="totalDocs" class="text-3xl font-bold text-blue-400">--</div>
+                    <div class="text-sm text-gray-400">Total Documents</div>
+                </div>
+                <div>
+                    <div id="userDocs" class="text-3xl font-bold text-green-400">--</div>
+                    <div class="text-sm text-gray-400">User Accessible Docs</div>
+                </div>
+                <div>
+                    <div id="totalUsers" class="text-3xl font-bold text-purple-400">--</div>
+                    <div class="text-sm text-gray-400">Total Users</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Storage & Memory Usage -->
+        <div id="storageCard" class="card rounded-lg p-6 lg:col-span-2">
+            <h2 class="text-xl font-semibold text-white mb-4">Storage & Memory Usage</h2>
+            <table class="w-full text-left" id="usageTable">
+                <thead>
+                    <tr class="border-b border-gray-700">
+                        <th class="py-2 text-gray-400 font-semibold">Data Type</th>
+                        <th class="py-2 text-gray-400 font-semibold">Disk Usage</th>
+                        <th class="py-2 text-gray-400 font-semibold">Memory Usage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="3" class="py-4 text-gray-500">Awaiting data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Search Performance -->
+        <div id="performanceCard" class="card rounded-lg p-6 flex flex-col justify-center">
+             <h2 class="text-xl font-semibold text-white mb-4">Search Performance</h2>
+             <div class="space-y-4 text-center">
+                <div>
+                    <div class="text-3xl font-bold text-red-400"><span id="slowestQuery">--</span>s</div>
+                    <div class="text-sm text-gray-400">Slowest Query</div>
+                </div>
+                 <div>
+                    <div class="text-3xl font-bold text-green-400"><span id="fastestQuery">--</span>s</div>
+                    <div class="text-sm text-gray-400">Fastest Query</div>
+                </div>
+             </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initial JSON data to pre-populate the dashboard
+    const initialJson = `{
+        "message": "inspection completed successfully",
+        "inspection": {
+            "userid": "atu_13uU9xQmRYaZedUJrGUe7ZoCuzN9t2ahgTc",
+            "doctypeCountsUser": { "coredoc": 3257380 },
+            "doctypeCountsGlobal": { "aclGroup": 202804, "checkpoint": 88004, "collection": 29, "coredoc": 18643810, "kv": 5566479, "session": 6782, "user": 759152, "userAtolio": 20534, "userPrefs": 3552 },
+            "sourceStatsUser": [],
+            "sourceStatsGlobal": [ { "id": "outlook", "name": "Outlook", "count": 6786190, "newest": "2025-10-10T18:46:10Z" }, { "id": "salesforce", "name": "Salesforce", "count": 5890195, "newest": "2025-10-07T00:49:41Z" }, { "id": "teams", "name": "Teams", "count": 2537962, "newest": "2025-10-10T19:17:34Z" }, { "id": "jiradc", "name": "Jira DC", "count": 1892018, "newest": "2025-10-10T19:17:05Z" }, { "id": "slack", "name": "Slack", "count": 452182, "newest": "2025-10-10T19:17:34Z" }, { "id": "confluencedc", "name": "Confluence DC", "count": 142456, "newest": "2025-10-07T22:52:52Z" }, { "id": "sharepoint", "name": "SharePoint", "count": 137213, "newest": "2025-10-10T19:17:15Z" }, { "id": "zendesk", "name": "Zendesk", "count": 15936, "newest": "2025-10-10T19:01:44Z" }, { "id": "web", "name": "Web", "count": 6447, "newest": "2025-10-10T18:30:03Z" } ],
+            "vespaMetrics": [ { "key": "content.proton.documentdb.memory_usage.allocated_bytes.last", "value": 46973645822, "dimensions": { "documenttype": "coredoc" } }, { "key": "content.proton.documentdb.disk_usage.last", "value": 221088908520, "dimensions": { "documenttype": "coredoc" } }, { "key": "content.proton.documentdb.memory_usage.allocated_bytes.last", "value": 155156764, "dimensions": { "documenttype": "user" } }, { "key": "content.proton.documentdb.disk_usage.last", "value": 1004468930, "dimensions": { "documenttype": "user" } }, { "key": "content.proton.documentdb.memory_usage.allocated_bytes.last", "value": 353197481, "dimensions": { "documenttype": "kv" } }, { "key": "content.proton.documentdb.disk_usage.last", "value": 207985561, "dimensions": { "documenttype": "kv" } } ],
+            "timings": { "queryCollabs3yForUser": { "searchtime": 0.583 }, "queryCollabs90dForUser": { "searchtime": 0.553 }, "queryRecentCoredocsForUser": { "searchtime": 0.631 }, "queryWordHybridCoredocsForUser": { "searchtime": 0.807 }, "queryWordLexicalCoredocsForUser": { "searchtime": 1.882 }, "sourceStatsGlobal": { "searchtime": 0.276 }, "sourceStatsUser": { "searchtime": 0.281 } }
+        }
+    }`;
+
+    // DOM Elements
+    const jsonInputEl = document.getElementById('jsonInput');
+    const errorMessageEl = document.getElementById('errorMessage');
+    const cardIds = ['freshnessCard', 'scopeCard', 'storageCard', 'performanceCard'];
+
+    // HELPER FUNCTIONS
+    const formatBytes = (bytes, decimals = 2) => {
+        if (!+bytes) return '0 Bytes';
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+    };
+
+    const timeAgo = (dateString) => {
+        const now = new Date('2025-10-10T19:20:00Z');
+        const date = new Date(dateString);
+        const seconds = Math.floor((now - date) / 1000);
+        
+        if (seconds < 60) return "Just now";
+        let interval = seconds / 31536000;
+        if (interval > 1) return Math.floor(interval) + " years ago";
+        interval = seconds / 2592000;
+        if (interval > 1) return Math.floor(interval) + " months ago";
+        interval = seconds / 86400;
+        if (interval > 1) return Math.floor(interval) + " days ago";
+        interval = seconds / 3600;
+        if (interval > 1) return Math.floor(interval) + " hours ago";
+        interval = seconds / 60;
+        if (interval > 1) return Math.floor(interval) + " minutes ago";
+        return Math.floor(seconds) + " seconds ago";
+    };
+
+    // MAIN DASHBOARD UPDATE FUNCTION
+    function updateDashboard(jsonString) {
+        try {
+            const data = JSON.parse(jsonString);
+            if (!data.inspection) {
+                throw new Error("Invalid data structure: 'inspection' object not found.");
+            }
+            const inspection = data.inspection;
+            errorMessageEl.classList.add('hidden');
+
+            let problems = [];
+
+            // Reset highlights
+            cardIds.forEach(id => document.getElementById(id).classList.remove('border-yellow-500', 'border-2'));
+
+            // 1. Data Freshness check
+            const freshnessBody = document.querySelector('#freshnessTable tbody');
+            freshnessBody.innerHTML = '';
+            const sortedSources = inspection.sourceStatsGlobal.sort((a, b) => new Date(b.newest) - new Date(a.newest));
+            
+            sortedSources.forEach(source => {
+                const row = document.createElement('tr');
+                const lastUpdate = new Date(source.newest);
+                const hoursSinceUpdate = (new Date('2025-10-10T19:20:00Z') - lastUpdate) / (1000 * 60 * 60);
+                
+                let statusColor = 'bg-green-500';
+                if (hoursSinceUpdate > 48) {
+                    statusColor = 'bg-red-500';
+                    problems.push({ text: `${source.name} data is stale (over 48 hours old).`, link: '#freshnessCard' });
+                    row.classList.add('bg-red-500/10');
+                } else if (hoursSinceUpdate > 24) {
+                    statusColor = 'bg-yellow-500';
+                    problems.push({ text: `${source.name} data is over 24 hours old.`, link: '#freshnessCard' });
+                    row.classList.add('bg-yellow-500/10');
+                }
+                
+                row.innerHTML = `<td class="py-3 border-b border-gray-700"><div class="flex items-center gap-3"><div class="status-dot ${statusColor}"></div><span>${source.name}</span></div></td><td class="py-3 border-b border-gray-700 text-gray-400">${timeAgo(source.newest)}</td>`;
+                freshnessBody.appendChild(row);
+            });
+            if (problems.some(p => p.link === '#freshnessCard')) {
+                 document.getElementById('freshnessCard').classList.add('border-yellow-500', 'border-2');
+            }
+
+            // 2. Performance check
+            const timings = Object.values(inspection.timings || {}).map(t => t.searchtime).filter(Boolean);
+            if (timings.length > 0) {
+                const slowestTime = Math.max(...timings);
+                document.getElementById('slowestQuery').textContent = slowestTime.toFixed(3);
+                document.getElementById('fastestQuery').textContent = Math.min(...timings).toFixed(3);
+                if (slowestTime > 1.5) {
+                    problems.push({ text: `Slowest query took ${slowestTime.toFixed(3)}s (threshold: 1.5s).`, link: '#performanceCard' });
+                    document.getElementById('performanceCard').classList.add('border-yellow-500', 'border-2');
+                }
+            } else {
+                 document.getElementById('slowestQuery').textContent = '--';
+                 document.getElementById('fastestQuery').textContent = '--';
+            }
+            
+            // 3. Data Scope check
+            const userDocsCount = inspection.doctypeCountsUser?.coredoc || 0;
+            if (userDocsCount === 0) {
+                problems.push({ text: 'The inspected user has no accessible documents.', link: '#scopeCard' });
+                document.getElementById('scopeCard').classList.add('border-yellow-500', 'border-2');
+            }
+
+            // 4. Update Overall Health based on problems
+            const statusIndicator = document.getElementById('statusIndicator');
+            const statusMessage = document.getElementById('statusMessage');
+            const issuesDetails = document.getElementById('issuesDetails');
+            const issuesList = document.getElementById('issuesList');
+            const issuesSummary = document.getElementById('issuesSummary');
+
+            statusIndicator.className = 'status-indicator'; // Reset
+            if (problems.length > 0) {
+                statusIndicator.classList.add('bg-yellow-500');
+                statusMessage.textContent = `Inspection completed with ${problems.length} potential issue(s).`;
+                issuesSummary.textContent = `View ${problems.length} Issue(s)`;
+                issuesList.innerHTML = '';
+                problems.forEach(p => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<a href="${p.link}" class="hover:underline">${p.text}</a>`;
+                    issuesList.appendChild(li);
+                });
+                issuesDetails.classList.remove('hidden');
+                issuesDetails.open = true;
+            } else {
+                statusIndicator.classList.add('bg-green-500');
+                statusMessage.textContent = data.message;
+                issuesDetails.classList.add('hidden');
+                issuesDetails.open = false;
+            }
+
+            // 5. Update other cards
+            // Resource Usage
+            const usage = {};
+            (inspection.vespaMetrics || []).forEach(metric => {
+                const type = (metric.dimensions.documenttype || 'unknown').replace(/_/g, ' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase());
+                if (!usage[type]) usage[type] = { disk: 0, memory: 0 };
+                if (metric.key.includes('disk_usage')) usage[type].disk += metric.value;
+                else if (metric.key.includes('memory_usage')) usage[type].memory += metric.value;
+            });
+            const usageBody = document.querySelector('#usageTable tbody');
+            usageBody.innerHTML = '';
+            const sortedUsage = Object.entries(usage).sort(([, a], [, b]) => b.disk - a.disk);
+            sortedUsage.forEach(([type, values]) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td class="py-3 border-b border-gray-700">${type}</td><td class="py-3 border-b border-gray-700">${formatBytes(values.disk)}</td><td class="py-3 border-b border-gray-700">${formatBytes(values.memory)}</td>`;
+                usageBody.appendChild(row);
+            });
+
+            // Data Scope
+            document.getElementById('totalDocs').textContent = (inspection.doctypeCountsGlobal?.coredoc || 0).toLocaleString();
+            document.getElementById('userDocs').textContent = userDocsCount.toLocaleString();
+            document.getElementById('totalUsers').textContent = (inspection.doctypeCountsGlobal?.user || 0).toLocaleString();
+
+        } catch (error) {
+            errorMessageEl.textContent = `Error parsing JSON: ${error.message}`;
+            errorMessageEl.classList.remove('hidden');
+            console.error(error);
+        }
+    }
+
+    // EVENT LISTENERS
+    jsonInputEl.addEventListener('input', (e) => {
+        if (e.target.value) {
+            updateDashboard(e.target.value);
+        }
+    });
+
+    // INITIAL LOAD
+    window.addEventListener('DOMContentLoaded', () => {
+        try {
+            jsonInputEl.value = JSON.stringify(JSON.parse(initialJson), null, 2);
+            updateDashboard(initialJson);
+        } catch (e) {
+            console.error("Error with initial JSON data:", e);
+        }
+    });
+
+</script>
+</body>
+</html>
+
