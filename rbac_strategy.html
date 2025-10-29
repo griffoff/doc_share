@@ -10,6 +10,12 @@ title: RBAC Strategy
     <!-- 
       This is a single-file webpage. All CSS and JS are included.
       It has been converted into a paged presentation.
+      Includes:
+      - 12 slides total
+      - Collapsible code blocks
+      - Snowflake-specific examples
+      - Documentation excerpts
+      - Full end-to-end test script
     -->
     <style>
         /* Basic Setup */
@@ -98,6 +104,7 @@ title: RBAC Strategy
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            min-width: 0; /* FIX: Prevents flex items from overflowing their container */
         }
         .flex-item h3 {
             margin-top: 0;
@@ -115,6 +122,17 @@ title: RBAC Strategy
         .pitfall strong {
             color: #c0392b;
             font-size: 1.1em;
+        }
+
+        /* Blockquotes for Policy */
+        .policy-rule {
+            border-left: 5px solid #2980b9; /* Blue for policy */
+            background-color: #f5faff;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+            font-size: 1.05em;
+            font-weight: 500;
         }
 
         /* Lists for Best Practices */
@@ -144,9 +162,88 @@ title: RBAC Strategy
             border-top: 2px solid #eee;
             padding-top: 20px;
         }
+        
+        /* --- NEW: Collapsible Code --- */
+        .collapsible-trigger {
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            width: 100%;
+            text-align: left;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 1em;
+            font-weight: 600;
+            color: #2980b9;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 15px;
+            transition: background-color 0.2s;
+            box-sizing: border-box; /* Ensures padding doesn't break width */
+        }
+        .collapsible-trigger:hover {
+            background-color: #e9e9e9;
+        }
+        .collapsible-trigger::before {
+            content: '\25B6'; /* Right-pointing triangle */
+            margin-right: 10px;
+            color: #555;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        .collapsible-trigger.active::before {
+            transform: rotate(90deg); /* Down-pointing triangle */
+        }
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background-color: #fdfdfd;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+        }
+        .collapsible-content pre {
+            background-color: #2c3e50; /* Dark background for code */
+            color: #ecf0f1; /* Light text */
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+        /* We reset the 'code' styles inside the 'pre' block */
+        .collapsible-content pre code {
+            background-color: transparent;
+            color: #ecf0f1;
+            font-weight: normal;
+            font-family: "Courier New", Courier, monospace;
+            padding: 0;
+        }
+        /* Simple SQL-like highlighting */
+        .collapsible-content .sql-keyword { color: #5dade2; font-weight: bold; } /* Blue */
+        .collapsible-content .sql-string { color: #e67e22; } /* Orange */
+        .collapsible-content .sql-comment { color: #95a5a6; font-style: italic; } /* Gray */
+        /* --- End Collapsible Code --- */
+
+        /* Documentation Excerpts */
+        .doc-excerpt {
+            border-left: 4px solid #16a085;
+            background-color: #f8f8f8;
+            padding: 10px 15px;
+            margin: 10px 0;
+            font-style: italic;
+            color: #555;
+        }
+        .doc-link {
+            display: block;
+            font-size: 0.9em;
+            word-break: break-all;
+        }
+
 
         /* Responsive Design */
-        @media (max-width: 768px) {
+        @media (max-width: 820px) { /* Widened breakpoint for stacking */
             .flex-container {
                 flex-direction: column;
             }
@@ -224,7 +321,7 @@ title: RBAC Strategy
                     <p><strong>What it is:</strong> A two-part concept for every asset (schema, table, view).</p>
                     <ul>
                         <li><strong>Functional Owner (The Role):</strong> A stable, high-privilege database role (e.g., <code>schema_owner</code>) that *technically* owns the object. This ensures system stability, even during org changes.</li>
-                        <li><strong>Accountable Owner (The Person):</strong> A specific *person* (e.g., a Team Lead or Data Steward) identified in our **Collibra data governance platform** as *responsible* for the asset's lifecycle. Database metadata can feed or back this up.</li>
+                        <li><strong>Accountable Owner (The Person):</strong> A specific *person* (e.g., a Team Lead or Data Steward) identified in our **Collibra data governance platform** as *responsible* for the asset's lifecycle. This metadata is *pushed down* from Collibra to the database for reference.</li>
                     </ul>
                     <p>The <strong>Accountable Owner</strong> is the one responsible for:</p>
                     <ul>
@@ -233,10 +330,54 @@ title: RBAC Strategy
                         <li>Who to contact if there's a data quality issue.</li>
                     </ul>
                     <p><strong>Why it matters:</strong> It prevents "orphaned" assets. The functional role keeps the system from breaking, while the accountable owner in Collibra ensures someone is always responsible for the data's business purpose and lifecycle.</p>
+
+                    <button class="collapsible-trigger">Show Code Example: Functional Ownership (Snowflake)</button>
+                    <div class="collapsible-content">
+                        <pre><code class="language-sql"><span class="sql-comment">-- Example: Assigning stable, role-based ownership</span>
+
+<span class="sql-comment">-- 1. Create the stable, personless role (per-schema)</span>
+<span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> schema_owner_finance;
+
+<span class="sql-comment">-- 2. Grant it OWNERSHIP on the schema itself.</span>
+<span class="sql-comment">-- This role is now the Functional Owner.</span>
+<span class="sql-keyword">GRANT OWNERSHIP ON SCHEMA</span> Finance <span class="sql-keyword">TO ROLE</span> schema_owner_finance;
+
+<span class="sql-comment">-- 3. Grant OWNERSHIP on *future* objects to this role.</span>
+<span class="sql-comment">-- This is the core automation capability.</span>
+<span class="sql-keyword">GRANT OWNERSHIP ON FUTURE TABLES IN SCHEMA</span> Finance <span class="sql-keyword">TO ROLE</span> schema_owner_finance;
+<span class="sql-keyword">GRANT OWNERSHIP ON FUTURE VIEWS IN SCHEMA</span> Finance <span class="sql-keyword">TO ROLE</span> schema_owner_finance;
+
+<span class="sql-comment">-- 4. Create the Full Access (FA) role for this schema</span>
+<span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> finance_FA;
+<span class="sql-keyword">GRANT ALL ON SCHEMA</span> Finance <span class="sql-keyword">TO ROLE</span> finance_FA;
+
+<span class="sql-comment">-- 5. CRITICAL STEP: Grant the owner role to the FA role.</span>
+<span class="sql-comment">-- This allows 'finance_FA' to create objects that will</span>
+<span class="sql-comment">-- be owned by 'schema_owner_finance'.</span>
+<span class="sql-keyword">GRANT ROLE</span> schema_owner_finance <span class="sql-keyword">TO ROLE</span> finance_FA;
+
+<span class="sql-comment">-- 'finance_FA' is now the top-level role for this schema,</span>
+<span class="sql-comment">-- to be used in the privilege hierarchy (Slide 4).</span>
+                        </code></pre>
+                    </div>
+
+                    <button class="collapsible-trigger">Show Code Example: Assigning Accountability (Snowflake)</button>
+                    <div class="collapsible-content">
+                        <pre><code class="language-sql"><span class="sql-comment">-- Example: Using Snowflake COMMENT field</span>
+<span class="sql-comment">-- This metadata is pushed from Collibra via an</span>
+<span class="sql-comment">-- automated process to tag the schema.</span>
+<span class="sql-keyword">COMMENT ON SCHEMA</span> Finance <span class="sql-keyword">IS</span> 
+    <span class="sql-string">'{"AccountableOwner": "pete.smith@company.com", "Source": "Collibra"}'</span>;
+
+<span class="sql-comment">-- This allows anyone in the DB to query the</span>
+<span class="sql-comment">-- metadata while Collibra remains the source of truth.</span>
+                        </code></pre>
+                    </div>
+
                 </section>
             </div>
             
-            <!-- === SLIDE 4: PILLAR 2 (NEW) === -->
+            <!-- === SLIDE 4: PILLAR 2 === -->
             <div class="slide">
                 <section class="section" id="pillar2">
                     <h2>Pillar 2: Multi-Dimensional Inheritance</h2>
@@ -253,6 +394,18 @@ title: RBAC Strategy
                                 <li>...which implicitly grants access to <code>TABLE_A</code> inside that.</li>
                             </ul>
                             <p><strong>The rule:</strong> We grant at the highest logical level (e.g., the Schema), not the lowest (the Table).</p>
+
+                            <button class="collapsible-trigger">Show Code Example: Scope Hierarchy (Snowflake)</button>
+                            <div class="collapsible-content">
+                                <pre><code class="language-sql"><span class="sql-comment">-- Granting at the SCHEMA level (The "Where")</span>
+<span class="sql-comment">-- All tables/views created IN 'Finance'</span>
+<span class="sql-comment">-- will automatically inherit this permission.</span>
+<span class="sql-keyword">GRANT SELECT ON SCHEMA</span> Finance <span class="sql-keyword">TO ROLE</span> finance_READONLY;
+                                
+<span class="sql-comment">-- AVOID THIS (Breaks inheritance):</span>
+<span class="sql-comment">-- GRANT SELECT ON TABLE Finance.Specific_Table TO ROLE ...</span>
+                                </code></pre>
+                            </div>
                         </div>
                         
                         <div class="flex-item">
@@ -266,12 +419,46 @@ title: RBAC Strategy
                             </ul>
                             <p><strong>Access Roles (The Hierarchy):</strong></p>
                             <ul>
-                                <li><strong>Users</strong> are *only* granted...</li>
+                                <li><strong>Users</strong> are *only* granted (and can *only* <strong>USE</strong>)...</li>
                                 <li>...<strong>Business Roles</strong> (e.g., <code>Finance_Analyst</code>), which are members of...</li>
                                 <li>...<strong>Functional Roles</strong> (e.g., <code>DATASCIENTIST</code>), which are granted...</li>
                                 <li>...one of the <strong>Base Privileges</strong> (e.g., <code>RW</code>) on a schema.</li>
                             </ul>
                             <p><strong>The rule:</strong> Users *only* get Business Roles. This separates their job function from the raw database permissions.</p>
+
+                            <button class="collapsible-trigger">Show Code Example: Privilege Hierarchy (Snowflake)</button>
+                            <div class="collapsible-content">
+                                <pre><code class="language-sql"><span class="sql-comment">-- This example shows the full 4-layer model</span>
+
+<span class="sql-comment">-- 1. Create Base Privilege Roles for FINANCE schema</span>
+<span class="sql-comment">-- (The 'finance_FA' role was created on Slide 3)</span>
+<span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> finance_READONLY;
+<span class="sql-keyword">GRANT SELECT ON SCHEMA</span> Finance <span class="sql-keyword">TO ROLE</span> finance_READONLY;
+
+<span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> finance_RW;
+<span class="sql-keyword">GRANT INSERT, UPDATE, DELETE ON SCHEMA</span> Finance <span class="sql-keyword">TO ROLE</span> finance_RW;
+
+<span class="sql-comment">-- 2. Nest the Base Privilege Roles</span>
+<span class="sql-keyword">GRANT ROLE</span> finance_READONLY <span class="sql-keyword">TO ROLE</span> finance_RW;
+<span class="sql-keyword">GRANT ROLE</span> finance_RW <span class="sql-keyword">TO ROLE</span> finance_FA; <span class="sql-comment">-- (FA from Slide 3)</span>
+
+<span class="sql-comment">-- 3. Create Functional Role</span>
+<span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> DATASCIENTIST;
+
+<span class="sql-comment">-- 4. Create Business Role</span>
+<span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> Finance_Analyst;
+
+<span class="sql-comment">-- 5. Link the access hierarchy (permissions flow "up" to user)</span>
+<span class="sql-comment">-- Give Data Scientists RW access on the Finance schema</span>
+<span class="sql-keyword">GRANT ROLE</span> finance_RW <span class="sql-keyword">TO ROLE</span> DATASCIENTIST;
+<span class="sql-keyword">GRANT ROLE</span> DATASCIENTIST <span class="sql-keyword">TO ROLE</span> Finance_Analyst;
+<span class="sql-keyword">GRANT ROLE</span> Finance_Analyst <span class="sql-keyword">TO USER</span> pete;
+
+<span class="sql-comment">-- Result: 'pete' now has RW access on Finance schema</span>
+<span class="sql-comment">-- via inheritance: pete &lt;- Finance_Analyst &lt;- DATASCIENTIST &lt;- finance_RW</span>
+<span class="sql-comment">-- A different role (e.g., ETL_ADMIN) could be granted 'finance_FA'</span>
+                                </code></pre>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -292,7 +479,7 @@ title: RBAC Strategy
                 </section>
             </div>
 
-            <!-- === SLIDE 6: PITFALL 2 (UPDATED) === -->
+            <!-- === SLIDE 6: PITFALL 2 === -->
             <div class="slide">
                 <section class="section" id="pitfall2">
                     <h2>Pitfall: Breaking the Inheritance Chains</h2>
@@ -328,7 +515,7 @@ title: RBAC Strategy
                 </section>
             </div>
 
-            <!-- === SLIDE 8: BEST PRACTICE 2 (UPDATED) === -->
+            <!-- === SLIDE 8: BEST PRACTICE 2 === -->
             <div class="slide">
                 <section class="section" id="best-practice2">
                     <h2>Path Forward: The Inheritance Policy</h2>
@@ -338,20 +525,98 @@ title: RBAC Strategy
                     
                     <h4>On Scope (The "Where"):</h4>
                     <ul>
-                        <li><strong>Set Permissions at the Top:</strong> We will design our database logically (e.g., schemas by team or project). All permissions will be set at the schema level (e.g., <code>GRANT SELECT ON SCHEMA::Finance_Schema TO Finance_Team_READONLY</code>).</li>
+                        <li><strong>Set Permissions at the Top:</strong> We will design our database logically (e.g., schemas by team or project). All permissions will be set at the schema level (e.g., <code>GRANT SELECT ON SCHEMA Finance TO ROLE finance_READONLY</code>).</li>
                         <li><strong>Don't Break the Chain:</strong> Avoid manually granting/revoking permissions on individual tables or views. If an object needs different permissions, it probably lives in the wrong schema.</li>
                     </ul>
 
                     <h4>On Privilege (The "How"):</h4>
                     <ul>
-                        <li><strong>Grant Business Roles, Not Privileges:</strong> Users are *only* added to `Business Roles`. We will no longer grant <code>SELECT</code>, <code>INSERT</code>, <code>RW</code>, or even <code>DATASCIENTIST</code> directly to users.</li>
-                        <li><strong>Roles Inherit (Base):</strong> Our base privilege roles will be nested. <code>READONLY</code> will be a member of <code>RW</code>, and <code>RW</code> will be a member of <code>FA</code>. This ensures consistency.</li>
+                        <li style="font-weight: 600; color: #16a085;">(See Slide 4 for the full 4-layer code example)</li>
+                        <li><strong>Grant Business Roles, Not Privileges:</strong> Users are *only* added to `Business Roles` (and these are the only roles they can directly <strong>USE</strong>). We will no longer grant <code>SELECT</code>, <code>INSERT</code>, <code>RW</code>, or even <code>DATASCIENTIST</code> directly to users.</li>
+                        <li><strong>Roles Inherit (Base):</strong> Our base privilege roles will be nested and *schema-specific* (e.g., <code>finance_READONLY</code> will be a member of <code>finance_RW</code>, and <code>finance_RW</code> will be a member of <code>finance_FA</code>). This ensures consistency.</li>
                         <li><strong>Roles Inherit (Access):</strong> Our `Business Roles` will be members of one or more `Functional Roles`. Our `Functional Roles` will be granted one of our `Privilege Roles` (scoped to a schema).</li>
                     </ul>
                 </section>
             </div>
 
-            <!-- === SLIDE 9: ACTION PLAN (UPDATED) === -->
+            <!-- === NEW: SLIDE 9: CORE POLICY === -->
+            <div class="slide">
+                <section class="section" id="core-policy">
+                    <h2>The Core RBAC Policy</h2>
+                    <p>These are the non-negotiable rules for our new model. All new implementations and remediation efforts must adhere to this policy.</p>
+
+                    <div class="policy-rule">
+                        <strong>Rule 1: Users are only granted Business Roles.</strong>
+                        <p>A user (e.g., <code>pete</code>) is *only* ever granted a role that represents their job function (e.g., <code>Finance_Analyst_User</code>). A user must never be granted a privilege role (<code>finance_RW</code>) or functional role (<code>DATASCIENTIST</code>) directly.</p>
+                    </div>
+
+                    <div class="policy-rule">
+                        <strong>Rule 2: Users can only USE Business Roles.</strong>
+                        <p>Because of Rule 1, a user can only activate (<code>USE ROLE</code>) the Business Roles they are explicitly granted. All underlying roles are abstract and unusable by the user, even though they inherit the permissions.</p>
+                    </div>
+                    
+                    <div class="policy-rule">
+                        <strong>Rule 3: Only "Privilege Roles" are granted object permissions.</strong>
+                        <p>No privilege (<code>SELECT</code>, <code>INSERT</code>, <code>ALL</code>, etc.) should be granted to any role *except* for a standardized Base Privilege Role (e.g., <code>finance_READONLY</code>, <code>finance_RW</code>, <code>finance_FA</code>).</p>
+                    </div>
+                    
+                    <div class="policy-rule">
+                        <strong>Rule 4: All other roles inherit from Privilege Roles.</strong>
+                        <p>Functional Roles (<code>DATASCIENTIST</code>) inherit from one or more Privilege Roles. Business Roles (<code>Finance_Analyst_User</code>) inherit from one or more Functional Roles. This creates the full, auditable chain.</p>
+                    </div>
+
+                    <div class="policy-rule">
+                        <strong>Rule 5: Permissions are granted at the highest scope.</strong>
+                        <p>All object permissions must be granted at the schema level (e.g., <code>GRANT SELECT ON ALL TABLES IN SCHEMA...</code>) or database level. Grants on individual tables or views are forbidden without a documented exception.</p>
+                    </div>
+
+                </section>
+            </div>
+
+            <!-- === SLIDE 10: DOCUMENTATION (WAS 9) === -->
+            <div class="slide">
+                <section class="section" id="documentation">
+                    <h2>Official Documentation & Proof</h2>
+                    <p>The concepts we've discussed are all standard, best-practice features in Snowflake. Here are the direct links and excerpts from the official documentation.</p>
+                    
+                    <ul style="list-style-type: none; margin-left: 0; padding-left: 0;">
+                        <li>
+                            <strong>Overview of Access Control:</strong>
+                            <p>Explains Snowflake's hybrid model of Discretionary Access Control (DAC) and Role-Based Access Control (RBAC).</p>
+                            <blockquote class="doc-excerpt">
+                                "In Snowflake, a role is an entity to which privileges can be granted. Roles are in turn assigned to users. ... Roles can be also granted to other roles, creating a hierarchy of roles."
+                            </blockquote>
+                            <a href="https://docs.snowflake.com/en/user-guide/security-access-control-overview" target="_blank" class="doc-link">docs.snowflake.com/en/user-guide/security-access-control-overview</a>
+                        </li>
+                        <li style="margin-top: 15px;">
+                            <strong>GRANT OWNERSHIP:</strong>
+                            <p>The official documentation for transferring ownership of an object (or all future objects) to a role.</p>
+                             <blockquote class="doc-excerpt">
+                                "Transfers ownership of an object... from one role to another role. ... Use of this command... is particularly useful for transferring ownership of objects created by one role to a different role."
+                            </blockquote>
+                            <a href="https://docs.snowflake.com/en/sql-reference/sql/grant-ownership" target="_blank" class="doc-link">docs.snowflake.com/en/sql-reference/sql/grant-ownership</a>
+                        </li>
+                        <li style="margin-top: 15px;">
+                            <strong>GRANT &lt;privileges&gt; TO ROLE (and Future Grants):</strong>
+                            <p>This document covers granting specific privileges, including the critical <code>ON FUTURE TABLES</code> clause.</p>
+                            <blockquote class="doc-excerpt">
+                                "Grants privileges on *future* objects of a specified type in a database or schema to a role. ... Future grants only define the initial set of privileges granted on new objects..."
+                            </blockquote>
+                            <a href="https://docs.snowflake.com/en/sql-reference/sql/grant-privilege" target="_blank" class="doc-link">docs.snowflake.com/en/sql-reference/sql/grant-privilege</a>
+                        </li>
+                        <li style="margin-top: 15px;">
+                            <strong>COMMENT:</strong>
+                            <p>Documentation for the <code>COMMENT ON</code> command, which allows us to programmatically attach metadata.</p>
+                            <blockquote class="doc-excerpt">
+                                "Adds a comment or overwrites an existing comment for an existing object. Comments can be added to all objects (users, roles, warehouses, databases, tables, and so on)."
+                            </blockquote>
+                            <a href="https://docs.snowflake.com/en/sql-reference/sql/comment" target="_blank" class="doc-link">docs.snowflake.com/en/sql-reference/sql/comment</a>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+
+            <!-- === SLIDE 11: ACTION PLAN (WAS 10) === -->
             <div class="slide">
                 <section class="section" id="next-steps">
                     <h2>Our Action Plan</h2>
@@ -365,7 +630,7 @@ title: RBAC Strategy
                                 <li>Initial set of Business Roles (<code>Finance_Analyst</code>, etc.).</li>
                             </ul>
                         </li>
-                        <li><strong>Automate:</strong> We will script the creation and management of this role hierarchy. We will also work to automate the syncing of accountable owners between Collibra and our database metadata.</li>
+                        <li><strong>Automate:</strong> We will script the creation and management of this role hierarchy. We will also work to automate the *pushing* of accountable owners from Collibra *down* to our database metadata comments.</li>
                         <li><strong>Remediate:</strong> We will work together to update our assets. This will involve:
                             <ul>
                                 <li>Assigning proper *Accountable Owners* in Collibra.</li>
@@ -373,7 +638,7 @@ title: RBAC Strategy
                                 <li>Cleaning up "one-off" permissions and moving users into the new standard *Business Roles*.</li>
                             </ul>
                         </li>
-                        <li><strong>Adopt:</strong> All new database objects and permissions created from this point forward must follow these policies.</li>
+                        <li><strong>Adopt:</strong> All new database objects and permissions created from this point forward must follow the **Core RBAC Policy (Slide 9)**.</li>
                     </ol>
                     
                     <footer class="footer-content">
@@ -382,12 +647,268 @@ title: RBAC Strategy
                 </section>
             </div>
 
+            <!-- === SLIDE 12: TEST SCRIPT (WAS 11) === -->
+            <div class="slide">
+                <section class="section" id="test-script">
+                    <h2>End-to-End Test Script</h2>
+                    <p>This script provides a complete, runnable test of the entire policy. It builds the structure from scratch and then runs validation checks using test users.</p>
+
+                    <button class="collapsible-trigger">Show Full RBAC Test Script (Snowflake)</button>
+                    <div class="collapsible-content">
+                        <pre><code class="language-sql"><span class="sql-comment">-- =========================================================</span>
+<span class="sql-comment">-- PART 1: SETUP (Run as SYSADMIN or SECURITYADMIN)</span>
+<span class="sql-comment">-- =========================================================</span>
+<span class="sql-keyword">USE ROLE</span> SECURITYADMIN;
+
+<span class="sql-comment">-- Create a central role for managing functional roles</span>
+<span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> functional_role_admin;
+<span class="sql-keyword">GRANT ROLE</span> functional_role_admin <span class="sql-keyword">TO ROLE</span> SYSADMIN;
+
+<span class="sql-comment">-- Create a central role for managing business roles</span>
+<span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> business_role_admin;
+<span class="sql-keyword">GRANT ROLE</span> business_role_admin <span class="sql-keyword">TO ROLE</span> SYSADMIN;
+<span class="sql-keyword">GRANT ROLE</span> business_role_admin <span class="sql-keyword">TO ROLE</span> USERADMIN;
+
+<span class="sql-comment">-- Grant role creation to USERADMIN</span>
+<span class="sql-keyword">GRANT CREATE ROLE ON ACCOUNT TO ROLE</span> USERADMIN;
+<span class="sql-keyword">GRANT ROLE</span> functional_role_admin <span class="sql-keyword">TO ROLE</span> USERADMIN;
+
+<span class="sql-comment">-- Use SYSADMIN for object creation</span>
+<span class="sql-keyword">USE ROLE</span> SYSADMIN;
+<span class="sql-keyword">CREATE DATABASE IF NOT EXISTS</span> RBAC_TESTING;
+<span class="sql-keyword">CREATE WAREHOUSE IF NOT EXISTS</span> TEST_WH WAREHOUSE_SIZE=XSMALL;
+<span class="sql-keyword">GRANT ALL ON WAREHOUSE</span> TEST_WH <span class="sql-keyword">TO ROLE</span> SYSADMIN;
+
+<span class="sql-keyword">USE</span> RBAC_TESTING;
+
+<span class="sql-comment">-- --- 1.1: FINANCE SCHEMA SETUP ---</span>
+<span class="sql-keyword">CREATE SCHEMA IF NOT EXISTS</span> FINANCE;
+<span class="sql-keyword">COMMENT ON SCHEMA</span> FINANCE <span class="sql-keyword">IS</span> <span class="sql-string">'{"AccountableOwner": "finance.lead@company.com", "Source": "Collibra"}'</span>;
+
+<span class="sql-comment">-- Create Privilege Roles</span>
+<span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> finance_READONLY;
+<span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> finance_RW;
+<span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> finance_FA;
+<span class="sql-comment">-- Create Owner Role</span>
+<span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> schema_owner_finance;
+
+<span class="sql-comment">-- Grant Privileges to Roles</span>
+<span class="sql-keyword">GRANT USAGE ON DATABASE</span> RBAC_TESTING <span class="sql-keyword">TO ROLE</span> finance_READONLY;
+<span class="sql-keyword">GRANT USAGE ON SCHEMA</span> FINANCE <span class="sql-keyword">TO ROLE</span> finance_READONLY;
+<span class="sql-keyword">GRANT SELECT ON ALL TABLES IN SCHEMA</span> FINANCE <span class="sql-keyword">TO ROLE</span> finance_READONLY;
+<span class="sql-keyword">GRANT SELECT ON FUTURE TABLES IN SCHEMA</span> FINANCE <span class="sql-keyword">TO ROLE</span> finance_READONLY;
+
+<span class="sql-keyword">GRANT USAGE ON DATABASE</span> RBAC_TESTING <span class="sql-keyword">TO ROLE</span> finance_RW;
+<span class="sql-keyword">GRANT USAGE ON SCHEMA</span> FINANCE <span class="sql-keyword">TO ROLE</span> finance_RW;
+<span class="sql-keyword">GRANT INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA</span> FINANCE <span class="sql-keyword">TO ROLE</span> finance_RW;
+<span class="sql-keyword">GRANT INSERT, UPDATE, DELETE ON FUTURE TABLES IN SCHEMA</span> FINANCE <span class="sql-keyword">TO ROLE</span> finance_RW;
+
+<span class="sql-keyword">GRANT ALL ON SCHEMA</span> FINANCE <span class="sql-keyword">TO ROLE</span> finance_FA;
+
+<span class="sql-comment">-- Grant Ownership</span>
+<span class="sql-keyword">GRANT OWNERSHIP ON SCHEMA</span> FINANCE <span class="sql-keyword">TO ROLE</span> schema_owner_finance;
+<span class="sql-keyword">GRANT OWNERSHIP ON FUTURE TABLES IN SCHEMA</span> FINANCE <span class="sql-keyword">TO ROLE</span> schema_owner_finance;
+
+<span class="sql-comment">-- Nest Roles</span>
+<span class="sql-keyword">GRANT ROLE</span> finance_READONLY <span class="sql-keyword">TO ROLE</span> finance_RW;
+<span class="sql-keyword">GRANT ROLE</span> finance_RW <span class="sql-keyword">TO ROLE</span> finance_FA;
+<span class="sql-keyword">GRANT ROLE</span> schema_owner_finance <span class="sql-keyword">TO ROLE</span> finance_FA; <span class="sql-comment">-- Critical step!</span>
+
+<span class="sql-comment">-- --- 1.2: SALES SCHEMA SETUP ---</span>
+<span class="sql-keyword">CREATE SCHEMA IF NOT EXISTS</span> SALES;
+<span class="sql-keyword">COMMENT ON SCHEMA</span> SALES <span class="sql-keyword">IS</span> <span class="sql-string">'{"AccountableOwner": "sales.lead@company.com", "Source": "Collibra"}'</span>;
+
+<span class="sql-comment">-- Create Roles</span>
+<span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> sales_READONLY;
+<span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> sales_RW;
+<span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> sales_FA;
+<span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> schema_owner_sales;
+
+<span class="sql-comment">-- Grant Privileges</span>
+<span class="sql-keyword">GRANT USAGE ON DATABASE</span> RBAC_TESTING <span class="sql-keyword">TO ROLE</span> sales_READONLY;
+<span class="sql-keyword">GRANT USAGE ON SCHEMA</span> SALES <span class="sql-keyword">TO ROLE</span> sales_READONLY;
+<span class="sql-keyword">GRANT SELECT ON ALL TABLES IN SCHEMA</span> SALES <span class="sql-keyword">TO ROLE</span> sales_READONLY;
+<span class="sql-keyword">GRANT SELECT ON FUTURE TABLES IN SCHEMA</span> SALES <span class="sql-keyword">TO ROLE</span> sales_READONLY;
+<span class="sql-comment">-- (Repeat for RW, FA) ...</span>
+<span class="sql-keyword">GRANT ALL ON SCHEMA</span> SALES <span class="sql-keyword">TO ROLE</span> sales_FA;
+
+<span class="sql-comment">-- Grant Ownership</span>
+<span class="sql-keyword">GRANT OWNERSHIP ON SCHEMA</span> SALES <span class="sql-keyword">TO ROLE</span> schema_owner_sales;
+<span class="sql-keyword">GRANT OWNERSHIP ON FUTURE TABLES IN SCHEMA</span> SALES <span class="sql-keyword">TO ROLE</span> schema_owner_sales;
+
+<span class="sql-comment">-- Nest Roles</span>
+<span class="sql-comment">-- (Skipping RW for brevity)</span>
+<span class="sql-keyword">GRANT ROLE</span> sales_READONLY <span class="sql-keyword">TO ROLE</span> sales_FA;
+<span class="sql-keyword">GRANT ROLE</span> schema_owner_sales <span class="sql-keyword">TO ROLE</span> sales_FA;
+
+
+<span class="sql-comment">-- --- 1.3: FUNCTIONAL & BUSINESS ROLES (Run as USERADMIN) ---</span>
+<span class="sql-keyword">USE ROLE</span> USERADMIN;
+
+<span class="sql-comment">-- Create Functional Roles</span>
+<span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> DATASCIENTIST;
+<span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> ETL_SERVICE_ROLE;
+<span class="sql-keyword">GRANT ROLE</span> DATASCIENTIST <span class="sql-keyword">TO ROLE</span> functional_role_admin;
+<span class="sql-keyword">GRANT ROLE</span> ETL_SERVICE_ROLE <span class="sql-keyword">TO ROLE</span> functional_role_admin;
+
+<span class="sql-comment">-- Create Business Roles</span>
+<span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> Finance_Analyst_User;
+<span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> Sales_Analyst_User;
+<span class="sql-keyword">GRANT ROLE</span> Finance_Analyst_User <span class="sql-keyword">TO ROLE</span> business_role_admin;
+<span class="sql-keyword">GRANT ROLE</span> Sales_Analyst_User <span class="sql-keyword">TO ROLE</span> business_role_admin;
+
+<span class="sql-comment">-- --- 1.4: LINK HIERARCHY (Run as SYSADMIN/SECURITYADMIN) ---</span>
+<span class="sql-keyword">USE ROLE</span> SECURITYADMIN;
+
+<span class="sql-comment">-- Grant schema privileges to Functional Roles</span>
+<span class="sql-keyword">GRANT ROLE</span> finance_RW <span class="sql-keyword">TO ROLE</span> DATASCIENTIST;
+<span class="sql-keyword">GRANT ROLE</span> sales_READONLY <span class="sql-keyword">TO ROLE</span> DATASCIENTIST;
+<span class="sql-keyword">GRANT ROLE</span> finance_FA <span class="sql-keyword">TO ROLE</span> ETL_SERVICE_ROLE;
+<span class="sql-keyword">GRANT ROLE</span> sales_FA <span class="sql-keyword">TO ROLE</span> ETL_SERVICE_ROLE;
+
+<span class="sql-comment">-- Grant Functional Roles to Business Roles</span>
+<span class="sql-keyword">GRANT ROLE</span> DATASCIENTIST <span class="sql-keyword">TO ROLE</span> Finance_Analyst_User;
+<span class="sql-keyword">GRANT ROLE</span> sales_READONLY <span class="sql-keyword">TO ROLE</span> Sales_Analyst_User;
+
+<span class="sql-comment">-- Grant USAGE on WH to roles that will query</span>
+<span class="sql-keyword">GRANT USAGE ON WAREHOUSE</span> TEST_WH <span class="sql-keyword">TO ROLE</span> DATASCIENTIST;
+<span class="sql-keyword">GRANT USAGE ON WAREHOUSE</span> TEST_WH <span class="sql-keyword">TO ROLE</span> ETL_SERVICE_ROLE;
+<span class="sql-keyword">GRANT USAGE ON WAREHOUSE</span> TEST_WH <span class="sql-keyword">TO ROLE</span> Sales_Analyst_User;
+
+
+<span class="sql-comment">-- --- 1.5: CREATE TEST USERS (Run as USERADMIN) ---</span>
+<span class="sql-keyword">USE ROLE</span> USERADMIN;
+<span class="sql-keyword">CREATE USER IF NOT EXISTS</span> test_fin_analyst PASSWORD=<span class="sql-string">'Test1234'</span> MUST_CHANGE_PASSWORD=TRUE DEFAULT_ROLE=Finance_Analyst_User DEFAULT_WAREHOUSE=TEST_WH;
+<span class="sql-keyword">CREATE USER IF NOT EXISTS</span> test_sales_analyst PASSWORD=<span class="sql-string">'Test1234'</span> MUST_CHANGE_PASSWORD=TRUE DEFAULT_ROLE=Sales_Analyst_User DEFAULT_WAREHOUSE=TEST_WH;
+<span class="sql-keyword">CREATE USER IF NOT EXISTS</span> test_etl_service PASSWORD=<span class="sql-string">'Test1234'</span> MUST_CHANGE_PASSWORD=TRUE DEFAULT_ROLE=ETL_SERVICE_ROLE DEFAULT_WAREHOUSE=TEST_WH;
+
+<span class="sql-keyword">GRANT ROLE</span> Finance_Analyst_User <span class="sql-keyword">TO USER</span> test_fin_analyst;
+<span class="sql-keyword">GRANT ROLE</span> Sales_Analyst_User <span class="sql-keyword">TO USER</span> test_sales_analyst;
+<span class="sql-keyword">GRANT ROLE</span> ETL_SERVICE_ROLE <span class="sql-keyword">TO USER</span> test_etl_service;
+
+
+<span class="sql-comment">-- =========================================================</span>
+<span class="sql-comment">-- PART 2: VALIDATION (Run as the test users)</span>
+<span class="sql-comment">-- =========================================================</span>
+
+<span class="sql-comment">-- --- 2.1: TEST OWNERSHIP (as ETL Service) ---</span>
+<span class="sql-keyword">USE ROLE</span> ETL_SERVICE_ROLE;
+<span class="sql-keyword">USE</span> RBAC_TESTING.FINANCE;
+<span class="sql-keyword">CREATE TABLE</span> finance_transactions (id INT, amount DECIMAL(10,2));
+<span class="sql-keyword">CREATE TABLE</span> SALES.sales_deals (id INT, value DECIMAL(10,2));
+
+<span class="sql-comment">-- Check ownership (run as SYSADMIN)</span>
+<span class="sql-keyword">USE ROLE</span> SYSADMIN;
+<span class="sql-comment">-- This query proves ownership. The owner should be the ROLE, not the USER.</span>
+<span class="sql-keyword">SHOW TABLES LIKE</span> <span class="sql-string">'%_transactions'</span> IN SCHEMA RBAC_TESTING.FINANCE;
+<span class="sql-comment">-- -> Look for 'owner' column. It should be 'SCHEMA_OWNER_FINANCE'</span>
+<span class="sql-keyword">SHOW TABLES LIKE</span> <span class="sql-string">'%_deals'</span> IN SCHEMA RBAC_TESTING.SALES;
+<span class="sql-comment">-- -> Look for 'owner' column. It should be 'SCHEMA_OWNER_SALES'</span>
+
+
+<span class="sql-comment">-- --- 2.2: TEST FINANCE ANALYST (RW in Fin, RO in Sales) ---</span>
+<span class="sql-keyword">USE ROLE</span> Finance_Analyst_User;
+<span class="sql-keyword">USE WAREHOUSE</span> TEST_WH;
+<span class="sql-keyword">USE</span> RBAC_TESTING.FINANCE;
+
+<span class="sql-comment">-- Test 1: Can write to FINANCE (SUCCESS expected)</span>
+<span class="sql-keyword">INSERT INTO</span> finance_transactions <span class="sql-keyword">VALUES</span> (1, 100.50);
+<span class="sql-keyword">SELECT</span> * <span class="sql-keyword">FROM</span> finance_transactions;
+
+<span class="sql-comment">-- Test 2: Can read from SALES (SUCCESS expected)</span>
+<span class="sql-keyword">SELECT</span> * <span class="sql-keyword">FROM</span> SALES.sales_deals;
+
+<span class="sql-comment">-- Test 3: Can write to SALES (FAILURE expected)</span>
+<span class="sql-comment">-- This user's DATASCIENTIST role only has sales_READONLY.</span>
+<span class="sql-keyword">INSERT INTO</span> SALES.sales_deals <span class="sql-keyword">VALUES</span> (2, 500.00);
+<span class="sql-comment">-- -> This should fail with a permissions error.</span>
+
+
+<span class="sql-comment">-- --- 2.3: TEST SALES ANALYST (RO in Sales, NO access in Fin) ---</span>
+<span class="sql-keyword">USE ROLE</span> Sales_Analyst_User;
+<span class="sql-keyword">USE WAREHOUSE</span> TEST_WH;
+<span class="sql-keyword">USE</span> RBAC_TESTING.SALES;
+
+<span class="sql-comment">-- Test 1: Can read from SALES (SUCCESS expected)</span>
+<span class="sql-keyword">SELECT</span> * <span class="sql-keyword">FROM</span> sales_deals;
+
+<span class="sql-comment">-- Test 2: Can write to SALES (FAILURE expected)</span>
+<span class="sql-comment">-- This user only has sales_READONLY.</span>
+<span class="sql-keyword">INSERT INTO</span> sales_deals <span class="sql-keyword">VALUES</span> (3, 750.00);
+<span class="sql-comment">-- -> This should fail with a permissions error.</span>
+
+<span class="sql-comment">-- Test 3: Can read from FINANCE (FAILURE expected)</span>
+<span class="sql-comment">-- This user has no roles that grant access to FINANCE.</span>
+<span class="sql-keyword">SELECT</span> * <span class="sql-keyword">FROM</span> FINANCE.finance_transactions;
+<span class="sql-comment">-- -> This should fail with an object-not-found or permissions error.</span>
+
+
+<span class="sql-comment">-- --- 2.4: TEST ABSTRACT ROLE USAGE (as Finance Analyst) ---</span>
+<span class="sql-comment">-- This test proves that users CANNOT directly use</span>
+<span class="sql-comment">-- the abstract roles they inherit from.</span>
+
+<span class->USE ROLE</span> Finance_Analyst_User;
+
+<span class="sql-comment">-- Test 1: Try to use the Functional Role (FAILURE expected)</span>
+<span class="sql-keyword">USE ROLE</span> DATASCIENTIST;
+<span class="sql-comment">-- -> This should fail. The user 'test_fin_analyst' was</span>
+<span class="sql-comment">--    not granted 'DATASCIENTIST' directly.</span>
+
+<span class="sql-comment">-- Test 2: Try to use the Privilege Role (FAILURE expected)</span>
+<span class="sql-keyword">USE ROLE</span> finance_RW;
+<span class="sql-comment">-- -> This should fail. The user was not granted</span>
+<span class="sql-comment">--    'finance_RW' directly.</span>
+
+<span class="sql-comment">-- Test 3: Revert to the Business Role (SUCCESS expected)</span>
+<span class="sql-keyword">USE ROLE</span> Finance_Analyst_User;
+<span class="sql-comment">-- -> This works, as it's the user's default/granted role.</span>
+
+
+<span class="sql-comment">-- =========================================================</span>
+<span class="sql-comment">-- PART 3: CLEANUP (Run as SYSADMIN)</span>
+<span class="sql-comment">-- =========================================================</span>
+<span class="sql-comment">/*
+USE ROLE SYSADMIN;
+DROP DATABASE IF EXISTS RBAC_TESTING;
+DROP WAREHOUSE IF EXISTS TEST_WH;
+
+USE ROLE USERADMIN;
+DROP USER IF EXISTS test_fin_analyst;
+DROP USER IF EXISTS test_sales_analyst;
+DROP USER IF EXISTS test_etl_service;
+
+USE ROLE SECURITYADMIN;
+DROP ROLE IF EXISTS Finance_Analyst_User;
+DROP ROLE IF EXISTS Sales_Analyst_User;
+DROP ROLE IF EXISTS DATASCIENTIST;
+DROP ROLE IF EXISTS ETL_SERVICE_ROLE;
+DROP ROLE IF EXISTS finance_READONLY;
+DROP ROLE IF EXISTS finance_RW;
+DROP ROLE IF EXISTS finance_FA;
+DROP ROLE IF EXISTS schema_owner_finance;
+DROP ROLE IF EXISTS sales_READONLY;
+DROP ROLE IF EXISTS sales_RW;
+DROP ROLE IF EXISTS sales_FA;
+DROP ROLE IF EXISTS schema_owner_sales;
+DROP ROLE IF EXISTS functional_role_admin;
+DROP ROLE IF EXISTS business_role_admin;
+*/</span>
+                        </code></pre>
+                    </div>
+
+                    <footer class="footer-content" style="margin-top: 20px;">
+                        <p>This script proves all principles. Thank you!</p>
+                    </footer>
+                </section>
+            </div>
+
+
         </div> <!-- end .presentation-body -->
 
         <!-- === NAVIGATION CONTROLS === -->
         <div class="navigation">
             <button class="nav-button" id="prevButton">Previous</button>
-            <span class="slide-counter" id="slideCounter">Slide 1 of 9</span>
+            <span class="slide-counter" id="slideCounter">Slide 1 of 12</span>
             <button class="nav-button" id="nextButton">Next</button>
         </div>
 
@@ -395,12 +916,13 @@ title: RBAC Strategy
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // --- Slide Navigation ---
             const slides = document.querySelectorAll('.slide');
             const prevButton = document.getElementById('prevButton');
             const nextButton = document.getElementById('nextButton');
             const slideCounter = document.getElementById('slideCounter');
             let currentSlide = 0;
-            const totalSlides = slides.length;
+            const totalSlides = slides.length; // This will now correctly be 12
 
             function showSlide(n) {
                 // Remove active class from old slide
@@ -420,7 +942,7 @@ title: RBAC Strategy
                 nextButton.disabled = (currentSlide === totalSlides - 1);
             }
 
-            // Event Listeners
+            // Event Listeners for navigation
             nextButton.addEventListener('click', () => {
                 if (currentSlide < totalSlides - 1) {
                     showSlide(currentSlide + 1);
@@ -429,16 +951,34 @@ title: RBAC Strategy
 
             prevButton.addEventListener('click', () => {
                 if (currentSlide > 0) {
-                    showSlide(currentSlide - 1);
+                    showSlide(currentSlide + 1);
                 }
             });
 
             // Initial setup
             showSlide(0);
+
+            // --- Collapsible Code Blocks ---
+            const triggers = document.querySelectorAll('.collapsible-trigger');
+            triggers.forEach(trigger => {
+                trigger.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    const content = this.nextElementSibling;
+                    if (content.style.maxHeight) {
+                        // If it's open, close it
+                        content.style.maxHeight = null;
+                    } else {
+                        // If it's closed, open it to its full scrollHeight
+                        content.style.maxHeight = content.scrollHeight + "px";
+                    }
+                });
+            });
+
         });
     </script>
 
 </body>
 </html>
+
 
 
