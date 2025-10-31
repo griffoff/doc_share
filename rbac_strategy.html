@@ -714,6 +714,18 @@ title: RBAC Strategy
 
 <span class="sql-keyword">USE</span> RBAC_TESTING;
 
+<span class="sql-comment">-- --- 1.0: SETUP TEST RESULT TABLE ---</span>
+<span class="sql-comment">-- Create a temporary table to collate all test results</span>
+<span class="sql-keyword">CREATE OR REPLACE TEMPORARY TABLE</span> RBAC_TESTING.PUBLIC.test_results (
+    test_name <span class="sql-keyword">STRING</span>,
+    status <span class="sql-keyword">STRING</span>,
+    details <span class="sql-keyword">STRING</span>
+);
+<span class="sql-comment">-- Grant all roles (via PUBLIC) the ability to insert results</span>
+<span class="sql-keyword">GRANT USAGE ON SCHEMA</span> RBAC_TESTING.PUBLIC <span class="sql-keyword">TO ROLE</span> PUBLIC;
+<span class="sql-keyword">GRANT INSERT, SELECT ON TABLE</span> RBAC_TESTING.PUBLIC.test_results <span class="sql-keyword">TO ROLE</span> PUBLIC;
+
+
 <span class="sql-comment">-- --- 1.1: FINANCE SCHEMA SETUP ---</span>
 <span class="sql-keyword">CREATE SCHEMA IF NOT EXISTS</span> FINANCE;
 <span class="sql-keyword">COMMENT ON SCHEMA</span> FINANCE <span class="sql-keyword">IS</span> <span class="sql-string">'{"AccountableOwner": "finance.lead@company.com", "Source": "Collibra"}'</span>;
@@ -839,28 +851,45 @@ title: RBAC Strategy
 <span class="sql-comment">-- Test 2.1.1: Create FINANCE table (SUCCESS expected)</span>
 <span class="sql-keyword">BEGIN</span>
   <span class="sql-keyword">CREATE TABLE</span> finance_transactions (id INT, amount DECIMAL(10,2));
-  <span class="sql-keyword">RETURN</span> <span class="sql-string">'PASS: Test 2.1.1 - Created finance_transactions'</span>;
+  <span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details) 
+    <span class="sql-keyword">VALUES</span> (<span class="sql-string">'Test 2.1.1'</span>, <span class="sql-string">'PASS'</span>, <span class="sql-string">'Created finance_transactions'</span>);
+  <span class="sql-keyword">RETURN</span> <span class="sql-string">'Test 2.1.1: PASS'</span>;
 <span class="sql-keyword">EXCEPTION</span>
   <span class="sql-keyword">WHEN OTHER THEN</span>
-    <span class="sql-keyword">RETURN</span> <span class="sql-string">'FAIL: Test 2.1.1 - Failed to create finance_transactions. Error: '</span> || SQLERRM;
+    <span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details) 
+      <span class="sql-keyword">VALUES</span> (<span class="sql-string">'Test 2.1.1'</span>, <span class="sql-string">'FAIL'</span>, <span class="sql-string">'Failed to create finance_transactions. Error: '</span> || SQLERRM);
+    <span class="sql-keyword">RETURN</span> <span class="sql-string">'Test 2.1.1: FAIL'</span>;
 <span class="sql-keyword">END;</span>
 
 <span class="sql-comment">-- Test 2.1.2: Create SALES table (SUCCESS expected)</span>
 <span class="sql-keyword">BEGIN</span>
   <span class="sql-keyword">CREATE TABLE</span> SALES.sales_deals (id INT, value DECIMAL(10,2));
-  <span class="sql-keyword">RETURN</span> <span class="sql-string">'PASS: Test 2.1.2 - Created SALES.sales_deals'</span>;
+  <span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details) 
+    <span class="sql-keyword">VALUES</span> (<span class="sql-string">'Test 2.1.2'</span>, <span class="sql-string">'PASS'</span>, <span class="sql-string">'Created SALES.sales_deals'</span>);
+  <span class="sql-keyword">RETURN</span> <span class="sql-string">'Test 2.1.2: PASS'</span>;
 <span class="sql-keyword">EXCEPTION</span>
   <span class="sql-keyword">WHEN OTHER THEN</span>
-    <span class="sql-keyword">RETURN</span> <span class="sql-string">'FAIL: Test 2.1.2 - Failed to create SALES.sales_deals. Error: '</span> || SQLERRM;
+    <span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details) 
+      <span class="sql-keyword">VALUES</span> (<span class="sql-string">'Test 2.1.2'</span>, <span class="sql-string">'FAIL'</span>, <span class="sql-string">'Failed to create SALES.sales_deals. Error: '</span> || SQLERRM);
+    <span class="sql-keyword">RETURN</span> <span class="sql-string">'Test 2.1.2: FAIL'</span>;
 <span class="sql-keyword">END;</span>
 
-<span class="sql-comment">-- Check ownership (run as SYSADMIN)</span>
+<span class="sql-comment">-- Test 2.1.3 & 2.1.4: Check ownership (run as SYSADMIN)</span>
 <span class="sql-keyword">USE ROLE</span> SYSADMIN;
 <span class="sql-comment">-- This query proves ownership. The owner should be the ROLE, not the USER.</span>
-<span class="sql-keyword">SHOW TABLES LIKE</span> <span class="sql-string">'%_transactions'</span> IN SCHEMA RBAC_TESTING.FINANCE;
-<span class="sql-comment">-- -> Look for 'owner' column. It should be 'SCHEMA_OWNER_FINANCE'</span>
-<span class="sql-keyword">SHOW TABLES LIKE</span> <span class="sql-string">'%_deals'</span> IN SCHEMA RBAC_TESTING.SALES;
-<span class="sql-comment">-- -> Look for 'owner' column. It should be 'SCHEMA_OWNER_SALES'</span>
+<span class="sql-keyword">SHOW TABLES LIKE</span> <span class="sql-string">'%finance_transactions%'</span> IN SCHEMA RBAC_TESTING.FINANCE;
+<span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details)
+  <span class="sql-keyword">SELECT</span> <span class="sql-string">'Test 2.1.3 (Ownership)'</span>, 
+         <span class="sql-keyword">CASE WHEN</span> "owner" = <span class="sql-string">'SCHEMA_OWNER_FINANCE'</span> <span class="sql-keyword">THEN</span> <span class="sql-string">'PASS'</span> <span class="sql-keyword">ELSE</span> <span class="sql-string">'FAIL'</span> <span class="sql-keyword">END</span>, 
+         <span class="sql-string">'FINANCE_TRANSACTIONS owner is: '</span> || "owner" 
+  <span class="sql-keyword">FROM</span> <span class="sql-keyword">TABLE</span>(RESULT_SCAN(LAST_QUERY_ID())) <span class="sql-keyword">WHERE</span> "name" = <span class="sql-string">'FINANCE_TRANSACTIONS'</span>;
+
+<span class="sql-keyword">SHOW TABLES LIKE</span> <span class="sql-string">'%sales_deals%'</span> IN SCHEMA RBAC_TESTING.SALES;
+<span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details)
+  <span class="sql-keyword">SELECT</span> <span class="sql-string">'Test 2.1.4 (Ownership)'</span>, 
+         <span class="sql-keyword">CASE WHEN</span> "owner" = <span class="sql-string">'SCHEMA_OWNER_SALES'</span> <span class="sql-keyword">THEN</span> <span class="sql-string">'PASS'</span> <span class="sql-keyword">ELSE</span> <span class="sql-string">'FAIL'</span> <span class="sql-keyword">END</span>, 
+         <span class="sql-string">'SALES_DEALS owner is: '</span> || "owner" 
+  <span class="sql-keyword">FROM</span> <span class="sql-keyword">TABLE</span>(RESULT_SCAN(LAST_QUERY_ID())) <span class="sql-keyword">WHERE</span> "name" = <span class="sql-string">'SALES_DEALS'</span>;
 
 
 <span class="sql-comment">-- --- 2.2: TEST FINANCE ANALYST (RW in Fin, RO in Sales) ---</span>
@@ -871,28 +900,40 @@ title: RBAC Strategy
 <span class="sql-comment">-- Test 2.2.1: Can write to FINANCE (SUCCESS expected)</span>
 <span class="sql-keyword">BEGIN</span>
   <span class="sql-keyword">INSERT INTO</span> finance_transactions <span class="sql-keyword">VALUES</span> (1, 100.50);
-  <span class="sql-keyword">RETURN</span> <span class="sql-string">'PASS: Test 2.2.1 - INSERT into finance_transactions succeeded as expected.'</span>;
+  <span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details) 
+    <span class="sql-keyword">VALUES</span> (<span class="sql-string">'Test 2.2.1'</span>, <span class="sql-string">'PASS'</span>, <span class="sql-string">'INSERT into finance_transactions succeeded as expected.'</span>);
+  <span class="sql-keyword">RETURN</span> <span class="sql-string">'Test 2.2.1: PASS'</span>;
 <span class="sql-keyword">EXCEPTION</span>
   <span class="sql-keyword">WHEN OTHER THEN</span>
-    <span class="sql-keyword">RETURN</span> <span class="sql-string">'FAIL: Test 2.2.1 - INSERT into finance_transactions failed. Error: '</span> || SQLERRM;
+    <span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details) 
+      <span class="sql-keyword">VALUES</span> (<span class="sql-string">'Test 2.2.1'</span>, <span class="sql-string">'FAIL'</span>, <span class="sql-string">'INSERT into finance_transactions failed. Error: '</span> || SQLERRM);
+    <span class="sql-keyword">RETURN</span> <span class="sql-string">'Test 2.2.1: FAIL'</span>;
 <span class="sql-keyword">END;</span>
 
 <span class="sql-comment">-- Test 2.2.2: Can read from SALES (SUCCESS expected)</span>
 <span class="sql-keyword">BEGIN</span>
   <span class="sql-keyword">SELECT</span> * <span class="sql-keyword">FROM</span> SALES.sales_deals;
-  <span class="sql-keyword">RETURN</span> <span class="sql-string">'PASS: Test 2.2.2 - SELECT from SALES.sales_deals succeeded as expected.'</span>;
+  <span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details) 
+    <span class="sql-keyword">VALUES</span> (<span class="sql-string">'Test 2.2.2'</span>, <span class="sql-string">'PASS'</span>, <span class="sql-string">'SELECT from SALES.sales_deals succeeded as expected.'</span>);
+  <span class="sql-keyword">RETURN</span> <span class="sql-string">'Test 2.2.2: PASS'</span>;
 <span class="sql-keyword">EXCEPTION</span>
   <span class="sql-keyword">WHEN OTHER THEN</span>
-    <span class="sql-keyword">RETURN</span> <span class="sql-string">'FAIL: Test 2.2.2 - SELECT from SALES.sales_deals failed. Error: '</span> || SQLERRM;
+    <span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details) 
+      <span class="sql-keyword">VALUES</span> (<span class="sql-string">'Test 2.2.2'</span>, <span class="sql-string">'FAIL'</span>, <span class="sql-string">'SELECT from SALES.sales_deals failed. Error: '</span> || SQLERRM);
+    <span class="sql-keyword">RETURN</span> <span class="sql-string">'Test 2.2.2: FAIL'</span>;
 <span class="sql-keyword">END;</span>
 
 <span class="sql-comment">-- Test 2.2.3: Can write to SALES (FAILURE expected)</span>
 <span class="sql-keyword">BEGIN</span>
   <span class="sql-keyword">INSERT INTO</span> SALES.sales_deals <span class="sql-keyword">VALUES</span> (2, 500.00);
-  <span class="sql-keyword">RETURN</span> <span class="sql-string">'FAIL: Test 2.2.3 - INSERT into SALES.sales_deals succeeded but should have failed.'</span>;
+  <span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details) 
+    <span class="sql-keyword">VALUES</span> (<span class="sql-string">'Test 2.2.3'</span>, <span class="sql-string">'FAIL'</span>, <span class="sql-string">'INSERT into SALES.sales_deals succeeded but should have failed.'</span>);
+  <span class="sql-keyword">RETURN</span> <span class="sql-string">'Test 2.2.3: FAIL'</span>;
 <span class="sql-keyword">EXCEPTION</span>
   <span class="sql-keyword">WHEN OTHER THEN</span>
-    <span class="sql-keyword">RETURN</span> <span class="sql-string">'PASS: Test 2.2.3 - INSERT into SALES.sales_deals failed as expected. Error: '</span> || SQLERRM;
+    <span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details) 
+      <span class="sql-keyword">VALUES</span> (<span class="sql-string">'Test 2.2.3'</span>, <span class="sql-string">'PASS'</span>, <span class="sql-string">'INSERT into SALES.sales_deals failed as expected. Error: '</span> || SQLERRM);
+    <span class="sql-keyword">RETURN</span> <span class="sql-string">'Test 2.2.3: PASS'</span>;
 <span class="sql-keyword">END;</span>
 
 
@@ -904,28 +945,40 @@ title: RBAC Strategy
 <span class="sql-comment">-- Test 2.3.1: Can read from SALES (SUCCESS expected)</span>
 <span class="sql-keyword">BEGIN</span>
   <span class="sql-keyword">SELECT</span> * <span class="sql-keyword">FROM</span> sales_deals;
-  <span class="sql-keyword">RETURN</span> <span class="sql-string">'PASS: Test 2.3.1 - SELECT from SALES.sales_deals succeeded as expected.'</span>;
+  <span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details) 
+    <span class="sql-keyword">VALUES</span> (<span class="sql-string">'Test 2.3.1'</span>, <span class="sql-string">'PASS'</span>, <span class="sql-string">'SELECT from SALES.sales_deals succeeded as expected.'</span>);
+  <span class="sql-keyword">RETURN</span> <span class="sql-string">'Test 2.3.1: PASS'</span>;
 <span class="sql-keyword">EXCEPTION</span>
   <span class="sql-keyword">WHEN OTHER THEN</span>
-    <span class="sql-keyword">RETURN</span> <span class="sql-string">'FAIL: Test 2.3.1 - SELECT from SALES.sales_deals failed. Error: '</span> || SQLERRM;
+    <span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details) 
+      <span class="sql-keyword">VALUES</span> (<span class="sql-string">'Test 2.3.1'</span>, <span class="sql-string">'FAIL'</span>, <span class="sql-string">'SELECT from SALES.sales_deals failed. Error: '</span> || SQLERRM);
+    <span class="sql-keyword">RETURN</span> <span class="sql-string">'Test 2.3.1: FAIL'</span>;
 <span class="sql-keyword">END;</span>
 
 <span class="sql-comment">-- Test 2.3.2: Can write to SALES (FAILURE expected)</span>
 <span class="sql-keyword">BEGIN</span>
   <span class="sql-keyword">INSERT INTO</span> sales_deals <span class="sql-keyword">VALUES</span> (3, 750.00);
-  <span class="sql-keyword">RETURN</span> <span class="sql-string">'FAIL: Test 2.3.2 - INSERT into SALES.sales_deals succeeded but should have failed.'</span>;
+  <span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details) 
+    <span class="sql-keyword">VALUES</span> (<span class="sql-string">'Test 2.3.2'</span>, <span class="sql-string">'FAIL'</span>, <span class="sql-string">'INSERT into SALES.sales_deals succeeded but should have failed.'</span>);
+  <span class="sql-keyword">RETURN</span> <span class="sql-string">'Test 2.3.2: FAIL'</span>;
 <span class="sql-keyword">EXCEPTION</span>
   <span class="sql-keyword">WHEN OTHER THEN</span>
-    <span class="sql-keyword">RETURN</span> <span class="sql-string">'PASS: Test 2.3.2 - INSERT into SALES.sales_deals failed as expected. Error: '</span> || SQLERRM;
+    <span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details) 
+      <span class="sql-keyword">VALUES</span> (<span class="sql-string">'Test 2.3.2'</span>, <span class="sql-string">'PASS'</span>, <span class="sql-string">'INSERT into SALES.sales_deals failed as expected. Error: '</span> || SQLERRM);
+    <span class="sql-keyword">RETURN</span> <span class="sql-string">'Test 2.3.2: PASS'</span>;
 <span class="sql-keyword">END;</span>
 
 <span class="sql-comment">-- Test 2.3.3: Can read from FINANCE (FAILURE expected)</span>
 <span class="sql-keyword">BEGIN</span>
   <span class="sql-keyword">SELECT</span> * <span class="sql-keyword">FROM</span> FINANCE.finance_transactions;
-  <span class="sql-keyword">RETURN</span> <span class="sql-string">'FAIL: Test 2.3.3 - SELECT from FINANCE.finance_transactions succeeded but should have failed.'</span>;
+  <span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details) 
+    <span class="sql-keyword">VALUES</span> (<span class="sql-string">'Test 2.3.3'</span>, <span class="sql-string">'FAIL'</span>, <span class="sql-string">'SELECT from FINANCE.finance_transactions succeeded but should have failed.'</span>);
+  <span class="sql-keyword">RETURN</span> <span class="sql-string">'Test 2.3.3: FAIL'</span>;
 <span class="sql-keyword">EXCEPTION</span>
   <span class="sql-keyword">WHEN OTHER THEN</span>
-    <span class="sql-keyword">RETURN</span> <span class="sql-string">'PASS: Test 2.3.3 - SELECT from FINANCE.finance_transactions failed as expected. Error: '</span> || SQLERRM;
+    <span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details) 
+      <span class="sql-keyword">VALUES</span> (<span class="sql-string">'Test 2.3.3'</span>, <span class="sql-string">'PASS'</span>, <span class="sql-string">'SELECT from FINANCE.finance_transactions failed as expected. Error: '</span> || SQLERRM);
+    <span class="sql-keyword">RETURN</span> <span class="sql-string">'Test 2.3.3: PASS'</span>;
 <span class="sql-keyword">END;</span>
 
 
@@ -935,29 +988,49 @@ title: RBAC Strategy
 <span class="sql-comment">-- Test 2.4.1: Try to use the Functional Role (FAILURE expected)</span>
 <span class="sql-keyword">BEGIN</span>
   <span class="sql-keyword">USE ROLE</span> DATASCIENTIST;
-  <span class="sql-keyword">RETURN</span> <span class="sql-string">'FAIL: Test 2.4.1 - USE ROLE DATASCIENTIST succeeded but should have failed.'</span>;
+  <span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details) 
+    <span class="sql-keyword">VALUES</span> (<span class="sql-string">'Test 2.4.1'</span>, <span class="sql-string">'FAIL'</span>, <span class="sql-string">'USE ROLE DATASCIENTIST succeeded but should have failed.'</span>);
+  <span class="sql-keyword">RETURN</span> <span class="sql-string">'Test 2.4.1: FAIL'</span>;
 <span class="sql-keyword">EXCEPTION</span>
   <span class="sql-keyword">WHEN OTHER THEN</span>
-    <span class="sql-keyword">RETURN</span> <span class="sql-string">'PASS: Test 2.4.1 - USE ROLE DATASCIENTIST failed as expected. Error: '</span> || SQLERRM;
+    <span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details) 
+      <span class="sql-keyword">VALUES</span> (<span class="sql-string">'Test 2.4.1'</span>, <span class="sql-string">'PASS'</span>, <span class="sql-string">'USE ROLE DATASCIENTIST failed as expected. Error: '</span> || SQLERRM);
+    <span class="sql-keyword">RETURN</span> <span class="sql-string">'Test 2.4.1: PASS'</span>;
 <span class="sql-keyword">END;</span>
 
 <span class="sql-comment">-- Test 2.4.2: Try to use the Privilege Role (FAILURE expected)</span>
 <span class="sql-keyword">BEGIN</span>
   <span class="sql-keyword">USE ROLE</span> finance_RW;
-  <span class="sql-keyword">RETURN</span> <span class="sql-string">'FAIL: Test 2.4.2 - USE ROLE finance_RW succeeded but should have failed.'</span>;
+  <span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details) 
+    <span class="sql-keyword">VALUES</span> (<span class="sql-string">'Test 2.4.2'</span>, <span class="sql-string">'FAIL'</span>, <span class="sql-string">'USE ROLE finance_RW succeeded but should have failed.'</span>);
+  <span class="sql-keyword">RETURN</span> <span class="sql-string">'Test 2.4.2: FAIL'</span>;
 <span class="sql-keyword">EXCEPTION</span>
   <span class="sql-keyword">WHEN OTHER THEN</span>
-    <span class="sql-keyword">RETURN</span> <span class="sql-string">'PASS: Test 2.4.2 - USE ROLE finance_RW failed as expected. Error: '</span> || SQLERRM;
+    <span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details) 
+      <span class="sql-keyword">VALUES</span> (<span class="sql-string">'Test 2.4.2'</span>, <span class="sql-string">'PASS'</span>, <span class="sql-string">'USE ROLE finance_RW failed as expected. Error: '</span> || SQLERRM);
+    <span class="sql-keyword">RETURN</span> <span class="sql-string">'Test 2.4.2: PASS'</span>;
 <span class="sql-keyword">END;</span>
 
 <span class="sql-comment">-- Test 2.4.3: Revert to the Business Role (SUCCESS expected)</span>
 <span class="sql-keyword">BEGIN</span>
   <span class="sql-keyword">USE ROLE</span> Finance_Analyst_User;
-  <span class="sql-keyword">RETURN</span> <span class="sql-string">'PASS: Test 2.4.3 - USE ROLE Finance_Analyst_User succeeded as expected.'</span>;
+  <span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details) 
+    <span class="sql-keyword">VALUES</span> (<span class="sql-string">'Test 2.4.3'</span>, <span class="sql-string">'PASS'</span>, <span class="sql-string">'USE ROLE Finance_Analyst_User succeeded as expected.'</span>);
+  <span class="sql-keyword">RETURN</span> <span class="sql-string">'Test 2.4.3: PASS'</span>;
 <span class="sql-keyword">EXCEPTION</span>
   <span class="sql-keyword">WHEN OTHER THEN</span>
-    <span class="sql-keyword">RETURN</span> <span class="sql-string">'FAIL: Test 2.4.3 - USE ROLE Finance_Analyst_User failed. Error: '</span> || SQLERRM;
+    <span class="sql-keyword">INSERT INTO</span> RBAC_TESTING.PUBLIC.test_results (test_name, status, details) 
+      <span class="sql-keyword">VALUES</span> (<span class="sql-string">'Test 2.4.3'</span>, <span class="sql-string">'FAIL'</span>, <span class="sql-string">'USE ROLE Finance_Analyst_User failed. Error: '</span> || SQLERRM);
+    <span class="sql-keyword">RETURN</span> <span class="sql-string">'Test 2.4.3: FAIL'</span>;
 <span class="sql-keyword">END;</span>
+
+
+<span class="sql-comment">-- =========================================================</span>
+<span class="sql-comment">-- PART 2.5: REVIEW TEST RESULTS (Run as SYSADMIN)</span>
+<span class="sql-comment">-- =========================================================</span>
+<span class->USE ROLE</span> SYSADMIN;
+<span class="sql-comment">-- This single table shows the PASS/FAIL status of all tests.</span>
+<span class="sql-keyword">SELECT</span> * <span class="sql-keyword">FROM</span> RBAC_TESTING.PUBLIC.test_results <span class="sql-keyword">ORDER BY</span> test_name;
 
 
 <span class="sql-comment">-- =========================================================</span>
@@ -966,28 +1039,11 @@ title: RBAC Strategy
 <span class="sql-comment">/*
 USE ROLE SYSADMIN;
 DROP DATABASE IF EXISTS RBAC_TESTING;
-DROP WAREHOUSE IF EXISTS TEST_WH;
-
-USE ROLE USERADMIN;
-DROP USER IF EXISTS test_fin_analyst;
-DROP USER IF EXISTS test_sales_analyst;
-DROP USER IF EXISTS test_etl_service;
-
-USE ROLE SECURITYADMIN;
-DROP ROLE IF EXISTS Finance_Analyst_User;
-DROP ROLE IF EXISTS Sales_Analyst_User;
-DROP ROLE IF EXISTS DATASCIENTIST;
-DROP ROLE IF EXISTS ETL_SERVICE_ROLE;
-DROP ROLE IF EXISTS finance_READONLY;
-DROP ROLE IF EXISTS finance_RW;
-DROP ROLE IF EXISTS finance_FA;
-DROP ROLE IF EXISTS schema_owner_finance;
-DROP ROLE IF EXISTS sales_READONLY;
-DROP ROLE IF EXISTS sales_RW;
-DROP ROLE IF EXISTS sales_FA;
-DROP ROLE IF EXISTS schema_owner_sales;
-DROP ROLE IF EXISTS functional_role_admin;
+...
 DROP ROLE IF EXISTS business_role_admin;
+
+-- The temporary table 'test_results' is dropped automatically
+-- when the session ends.
 */</span>
                         </code></pre>
                     </div>
@@ -1110,6 +1166,4 @@ DROP ROLE IF EXISTS business_role_admin;
 
 </body>
 </html>
-
-
 
