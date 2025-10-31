@@ -201,6 +201,7 @@ title: RBAC Strategy
             border: 1px solid #ddd;
             border-top: none;
             border-radius: 0 0 5px 5px;
+            position: relative; /* Added for copy button positioning */
         }
         .collapsible-content pre {
             background-color: #2c3e50; /* Dark background for code */
@@ -224,6 +225,33 @@ title: RBAC Strategy
         .collapsible-content .sql-keyword { color: #5dade2; font-weight: bold; } /* Blue */
         .collapsible-content .sql-string { color: #e67e22; } /* Orange */
         .collapsible-content .sql-comment { color: #95a5a6; font-style: italic; } /* Gray */
+        
+        /* --- NEW: Copy Button Styles --- */
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background-color: #95a5a6;
+            color: #ecf0f1;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            opacity: 0.8;
+        }
+        .copy-button:hover {
+            background-color: #7f8c8d;
+            opacity: 1;
+        }
+        .copy-button.copied {
+            background-color: #16a085; /* Green for success */
+            color: white;
+        }
+        /* --- End Copy Button Styles --- */
+        
         /* --- End Collapsible Code --- */
 
         /* Documentation Excerpts */
@@ -333,6 +361,7 @@ title: RBAC Strategy
 
                     <button class="collapsible-trigger">Show Code Example: Functional Ownership (Snowflake)</button>
                     <div class="collapsible-content">
+                        <button class="copy-button" title="Copy to clipboard">Copy</button>
                         <pre><code class="language-sql"><span class="sql-comment">-- Example: Assigning stable, role-based ownership</span>
 
 <span class="sql-comment">-- 1. Create the stable, personless role (per-schema)</span>
@@ -363,6 +392,7 @@ title: RBAC Strategy
 
                     <button class="collapsible-trigger">Show Code Example: Assigning Accountability (Snowflake)</button>
                     <div class="collapsible-content">
+                        <button class="copy-button" title="Copy to clipboard">Copy</button>
                         <pre><code class="language-sql"><span class="sql-comment">-- Example: Using Snowflake COMMENT field</span>
 <span class="sql-comment">-- This metadata is pushed from Collibra via an</span>
 <span class="sql-comment">-- automated process to tag the schema.</span>
@@ -397,6 +427,7 @@ title: RBAC Strategy
 
                             <button class="collapsible-trigger">Show Code Example: Scope Hierarchy (Snowflake)</button>
                             <div class="collapsible-content">
+                                <button class="copy-button" title="Copy to clipboard">Copy</button>
                                 <pre><code class="language-sql"><span class="sql-comment">-- Granting at the SCHEMA level (The "Where")</span>
 <span class="sql-comment">-- All tables/views created IN 'Finance'</span>
 <span class="sql-comment">-- will automatically inherit this permission.</span>
@@ -428,6 +459,7 @@ title: RBAC Strategy
 
                             <button class="collapsible-trigger">Show Code Example: Privilege Hierarchy (Snowflake)</button>
                             <div class="collapsible-content">
+                                <button class="copy-button" title="Copy to clipboard">Copy</button>
                                 <pre><code class="language-sql"><span class="sql-comment">-- This example shows the full 4-layer model</span>
 
 <span class="sql-comment">-- 1. Create Base Privilege Roles for FINANCE schema</span>
@@ -655,6 +687,7 @@ title: RBAC Strategy
 
                     <button class="collapsible-trigger">Show Full RBAC Test Script (Snowflake)</button>
                     <div class="collapsible-content">
+                        <button class="copy-button" title="Copy to clipboard">Copy</button>
                         <pre><code class="language-sql"><span class="sql-comment">-- =========================================================</span>
 <span class="sql-comment">-- PART 1: SETUP (Run as SYSADMIN or SECURITYADMIN)</span>
 <span class="sql-comment">-- =========================================================</span>
@@ -692,6 +725,10 @@ title: RBAC Strategy
 <span class="sql-comment">-- Create Owner Role</span>
 <span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> schema_owner_finance;
 
+<span class="sql-comment">-- Grant Ownership FIRST, before other grants on the schema</span>
+<span class="sql-keyword">GRANT OWNERSHIP ON SCHEMA</span> FINANCE <span class="sql-keyword">TO ROLE</span> schema_owner_finance;
+<span class="sql-keyword">GRANT OWNERSHIP ON FUTURE TABLES IN SCHEMA</span> FINANCE <span class="sql-keyword">TO ROLE</span> schema_owner_finance;
+
 <span class="sql-comment">-- Grant Privileges to Roles</span>
 <span class="sql-keyword">GRANT USAGE ON DATABASE</span> RBAC_TESTING <span class="sql-keyword">TO ROLE</span> finance_READONLY;
 <span class="sql-keyword">GRANT USAGE ON SCHEMA</span> FINANCE <span class="sql-keyword">TO ROLE</span> finance_READONLY;
@@ -704,10 +741,6 @@ title: RBAC Strategy
 <span class="sql-keyword">GRANT INSERT, UPDATE, DELETE ON FUTURE TABLES IN SCHEMA</span> FINANCE <span class="sql-keyword">TO ROLE</span> finance_RW;
 
 <span class="sql-keyword">GRANT ALL ON SCHEMA</span> FINANCE <span class="sql-keyword">TO ROLE</span> finance_FA;
-
-<span class="sql-comment">-- Grant Ownership</span>
-<span class="sql-keyword">GRANT OWNERSHIP ON SCHEMA</span> FINANCE <span class="sql-keyword">TO ROLE</span> schema_owner_finance;
-<span class="sql-keyword">GRANT OWNERSHIP ON FUTURE TABLES IN SCHEMA</span> FINANCE <span class="sql-keyword">TO ROLE</span> schema_owner_finance;
 
 <span class="sql-comment">-- Nest Roles</span>
 <span class="sql-keyword">GRANT ROLE</span> finance_READONLY <span class="sql-keyword">TO ROLE</span> finance_RW;
@@ -724,21 +757,27 @@ title: RBAC Strategy
 <span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> sales_FA;
 <span class="sql-keyword">CREATE ROLE IF NOT EXISTS</span> schema_owner_sales;
 
+<span class="sql-comment">-- Grant Ownership FIRST, before other grants on the schema</span>
+<span class="sql-keyword">GRANT OWNERSHIP ON SCHEMA</span> SALES <span class="sql-keyword">TO ROLE</span> schema_owner_sales;
+<span class="sql-keyword">GRANT OWNERSHIP ON FUTURE TABLES IN SCHEMA</span> SALES <span class="sql-keyword">TO ROLE</span> schema_owner_sales;
+
 <span class="sql-comment">-- Grant Privileges</span>
 <span class="sql-keyword">GRANT USAGE ON DATABASE</span> RBAC_TESTING <span class="sql-keyword">TO ROLE</span> sales_READONLY;
 <span class="sql-keyword">GRANT USAGE ON SCHEMA</span> SALES <span class="sql-keyword">TO ROLE</span> sales_READONLY;
 <span class="sql-keyword">GRANT SELECT ON ALL TABLES IN SCHEMA</span> SALES <span class="sql-keyword">TO ROLE</span> sales_READONLY;
 <span class="sql-keyword">GRANT SELECT ON FUTURE TABLES IN SCHEMA</span> SALES <span class="sql-keyword">TO ROLE</span> sales_READONLY;
-<span class="sql-comment">-- (Repeat for RW, FA) ...</span>
+
+<span class="sql-comment">-- Explicitly adding sales_RW grants (FIX)</span>
+<span class="sql-keyword">GRANT USAGE ON DATABASE</span> RBAC_TESTING <span class="sql-keyword">TO ROLE</span> sales_RW;
+<span class="sql-keyword">GRANT USAGE ON SCHEMA</span> SALES <span class="sql-keyword">TO ROLE</span> sales_RW;
+<span class="sql-keyword">GRANT INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA</span> SALES <span class="sql-keyword">TO ROLE</span> sales_RW;
+<span class="sql-keyword">GRANT INSERT, UPDATE, DELETE ON FUTURE TABLES IN SCHEMA</span> SALES <span class="sql-keyword">TO ROLE</span> sales_RW;
+
 <span class="sql-keyword">GRANT ALL ON SCHEMA</span> SALES <span class="sql-keyword">TO ROLE</span> sales_FA;
 
-<span class="sql-comment">-- Grant Ownership</span>
-<span class="sql-keyword">GRANT OWNERSHIP ON SCHEMA</span> SALES <span class="sql-keyword">TO ROLE</span> schema_owner_sales;
-<span class="sql-keyword">GRANT OWNERSHIP ON FUTURE TABLES IN SCHEMA</span> SALES <span class="sql-keyword">TO ROLE</span> schema_owner_sales;
-
-<span class="sql-comment">-- Nest Roles</span>
-<span class="sql-comment">-- (Skipping RW for brevity)</span>
-<span class="sql-keyword">GRANT ROLE</span> sales_READONLY <span class="sql-keyword">TO ROLE</span> sales_FA;
+<span class="sql-comment">-- Nest Roles (FIX: Added full nesting)</span>
+<span class="sql-keyword">GRANT ROLE</span> sales_READONLY <span class="sql-keyword">TO ROLE</span> sales_RW;
+<span class="sql-keyword">GRANT ROLE</span> sales_RW <span class="sql-keyword">TO ROLE</span> sales_FA;
 <span class="sql-keyword">GRANT ROLE</span> schema_owner_sales <span class="sql-keyword">TO ROLE</span> sales_FA;
 
 
@@ -789,13 +828,31 @@ title: RBAC Strategy
 
 <span class="sql-comment">-- =========================================================</span>
 <span class="sql-comment">-- PART 2: VALIDATION (Run as the test users)</span>
+<span class="sql-comment">-- Run each block one by one.</span>
 <span class="sql-comment">-- =========================================================</span>
 
 <span class="sql-comment">-- --- 2.1: TEST OWNERSHIP (as ETL Service) ---</span>
 <span class="sql-keyword">USE ROLE</span> ETL_SERVICE_ROLE;
+<span class="sql-keyword">USE WAREHOUSE</span> TEST_WH;
 <span class="sql-keyword">USE</span> RBAC_TESTING.FINANCE;
-<span class="sql-keyword">CREATE TABLE</span> finance_transactions (id INT, amount DECIMAL(10,2));
-<span class="sql-keyword">CREATE TABLE</span> SALES.sales_deals (id INT, value DECIMAL(10,2));
+
+<span class="sql-comment">-- Test 2.1.1: Create FINANCE table (SUCCESS expected)</span>
+<span class="sql-keyword">BEGIN</span>
+  <span class="sql-keyword">CREATE TABLE</span> finance_transactions (id INT, amount DECIMAL(10,2));
+  <span class="sql-keyword">RETURN</span> <span class="sql-string">'PASS: Test 2.1.1 - Created finance_transactions'</span>;
+<span class="sql-keyword">EXCEPTION</span>
+  <span class="sql-keyword">WHEN OTHER THEN</span>
+    <span class="sql-keyword">RETURN</span> <span class="sql-string">'FAIL: Test 2.1.1 - Failed to create finance_transactions. Error: '</span> || SQLERRM;
+<span class="sql-keyword">END;</span>
+
+<span class="sql-comment">-- Test 2.1.2: Create SALES table (SUCCESS expected)</span>
+<span class="sql-keyword">BEGIN</span>
+  <span class="sql-keyword">CREATE TABLE</span> SALES.sales_deals (id INT, value DECIMAL(10,2));
+  <span class="sql-keyword">RETURN</span> <span class="sql-string">'PASS: Test 2.1.2 - Created SALES.sales_deals'</span>;
+<span class="sql-keyword">EXCEPTION</span>
+  <span class="sql-keyword">WHEN OTHER THEN</span>
+    <span class="sql-keyword">RETURN</span> <span class="sql-string">'FAIL: Test 2.1.2 - Failed to create SALES.sales_deals. Error: '</span> || SQLERRM;
+<span class="sql-keyword">END;</span>
 
 <span class="sql-comment">-- Check ownership (run as SYSADMIN)</span>
 <span class="sql-keyword">USE ROLE</span> SYSADMIN;
@@ -811,17 +868,32 @@ title: RBAC Strategy
 <span class="sql-keyword">USE WAREHOUSE</span> TEST_WH;
 <span class="sql-keyword">USE</span> RBAC_TESTING.FINANCE;
 
-<span class="sql-comment">-- Test 1: Can write to FINANCE (SUCCESS expected)</span>
-<span class="sql-keyword">INSERT INTO</span> finance_transactions <span class="sql-keyword">VALUES</span> (1, 100.50);
-<span class="sql-keyword">SELECT</span> * <span class="sql-keyword">FROM</span> finance_transactions;
+<span class="sql-comment">-- Test 2.2.1: Can write to FINANCE (SUCCESS expected)</span>
+<span class="sql-keyword">BEGIN</span>
+  <span class="sql-keyword">INSERT INTO</span> finance_transactions <span class="sql-keyword">VALUES</span> (1, 100.50);
+  <span class="sql-keyword">RETURN</span> <span class="sql-string">'PASS: Test 2.2.1 - INSERT into finance_transactions succeeded as expected.'</span>;
+<span class="sql-keyword">EXCEPTION</span>
+  <span class="sql-keyword">WHEN OTHER THEN</span>
+    <span class="sql-keyword">RETURN</span> <span class="sql-string">'FAIL: Test 2.2.1 - INSERT into finance_transactions failed. Error: '</span> || SQLERRM;
+<span class="sql-keyword">END;</span>
 
-<span class="sql-comment">-- Test 2: Can read from SALES (SUCCESS expected)</span>
-<span class="sql-keyword">SELECT</span> * <span class="sql-keyword">FROM</span> SALES.sales_deals;
+<span class="sql-comment">-- Test 2.2.2: Can read from SALES (SUCCESS expected)</span>
+<span class="sql-keyword">BEGIN</span>
+  <span class="sql-keyword">SELECT</span> * <span class="sql-keyword">FROM</span> SALES.sales_deals;
+  <span class="sql-keyword">RETURN</span> <span class="sql-string">'PASS: Test 2.2.2 - SELECT from SALES.sales_deals succeeded as expected.'</span>;
+<span class="sql-keyword">EXCEPTION</span>
+  <span class="sql-keyword">WHEN OTHER THEN</span>
+    <span class="sql-keyword">RETURN</span> <span class="sql-string">'FAIL: Test 2.2.2 - SELECT from SALES.sales_deals failed. Error: '</span> || SQLERRM;
+<span class="sql-keyword">END;</span>
 
-<span class="sql-comment">-- Test 3: Can write to SALES (FAILURE expected)</span>
-<span class="sql-comment">-- This user's DATASCIENTIST role only has sales_READONLY.</span>
-<span class="sql-keyword">INSERT INTO</span> SALES.sales_deals <span class="sql-keyword">VALUES</span> (2, 500.00);
-<span class="sql-comment">-- -> This should fail with a permissions error.</span>
+<span class="sql-comment">-- Test 2.2.3: Can write to SALES (FAILURE expected)</span>
+<span class="sql-keyword">BEGIN</span>
+  <span class="sql-keyword">INSERT INTO</span> SALES.sales_deals <span class="sql-keyword">VALUES</span> (2, 500.00);
+  <span class="sql-keyword">RETURN</span> <span class="sql-string">'FAIL: Test 2.2.3 - INSERT into SALES.sales_deals succeeded but should have failed.'</span>;
+<span class="sql-keyword">EXCEPTION</span>
+  <span class="sql-keyword">WHEN OTHER THEN</span>
+    <span class="sql-keyword">RETURN</span> <span class="sql-string">'PASS: Test 2.2.3 - INSERT into SALES.sales_deals failed as expected. Error: '</span> || SQLERRM;
+<span class="sql-keyword">END;</span>
 
 
 <span class="sql-comment">-- --- 2.3: TEST SALES ANALYST (RO in Sales, NO access in Fin) ---</span>
@@ -829,39 +901,63 @@ title: RBAC Strategy
 <span class="sql-keyword">USE WAREHOUSE</span> TEST_WH;
 <span class="sql-keyword">USE</span> RBAC_TESTING.SALES;
 
-<span class="sql-comment">-- Test 1: Can read from SALES (SUCCESS expected)</span>
-<span class="sql-keyword">SELECT</span> * <span class="sql-keyword">FROM</span> sales_deals;
+<span class="sql-comment">-- Test 2.3.1: Can read from SALES (SUCCESS expected)</span>
+<span class="sql-keyword">BEGIN</span>
+  <span class="sql-keyword">SELECT</span> * <span class="sql-keyword">FROM</span> sales_deals;
+  <span class="sql-keyword">RETURN</span> <span class="sql-string">'PASS: Test 2.3.1 - SELECT from SALES.sales_deals succeeded as expected.'</span>;
+<span class="sql-keyword">EXCEPTION</span>
+  <span class="sql-keyword">WHEN OTHER THEN</span>
+    <span class="sql-keyword">RETURN</span> <span class="sql-string">'FAIL: Test 2.3.1 - SELECT from SALES.sales_deals failed. Error: '</span> || SQLERRM;
+<span class="sql-keyword">END;</span>
 
-<span class="sql-comment">-- Test 2: Can write to SALES (FAILURE expected)</span>
-<span class="sql-comment">-- This user only has sales_READONLY.</span>
-<span class="sql-keyword">INSERT INTO</span> sales_deals <span class="sql-keyword">VALUES</span> (3, 750.00);
-<span class="sql-comment">-- -> This should fail with a permissions error.</span>
+<span class="sql-comment">-- Test 2.3.2: Can write to SALES (FAILURE expected)</span>
+<span class="sql-keyword">BEGIN</span>
+  <span class="sql-keyword">INSERT INTO</span> sales_deals <span class="sql-keyword">VALUES</span> (3, 750.00);
+  <span class="sql-keyword">RETURN</span> <span class="sql-string">'FAIL: Test 2.3.2 - INSERT into SALES.sales_deals succeeded but should have failed.'</span>;
+<span class="sql-keyword">EXCEPTION</span>
+  <span class="sql-keyword">WHEN OTHER THEN</span>
+    <span class="sql-keyword">RETURN</span> <span class="sql-string">'PASS: Test 2.3.2 - INSERT into SALES.sales_deals failed as expected. Error: '</span> || SQLERRM;
+<span class="sql-keyword">END;</span>
 
-<span class="sql-comment">-- Test 3: Can read from FINANCE (FAILURE expected)</span>
-<span class="sql-comment">-- This user has no roles that grant access to FINANCE.</span>
-<span class="sql-keyword">SELECT</span> * <span class="sql-keyword">FROM</span> FINANCE.finance_transactions;
-<span class="sql-comment">-- -> This should fail with an object-not-found or permissions error.</span>
+<span class="sql-comment">-- Test 2.3.3: Can read from FINANCE (FAILURE expected)</span>
+<span class="sql-keyword">BEGIN</span>
+  <span class="sql-keyword">SELECT</span> * <span class="sql-keyword">FROM</span> FINANCE.finance_transactions;
+  <span class="sql-keyword">RETURN</span> <span class="sql-string">'FAIL: Test 2.3.3 - SELECT from FINANCE.finance_transactions succeeded but should have failed.'</span>;
+<span class="sql-keyword">EXCEPTION</span>
+  <span class="sql-keyword">WHEN OTHER THEN</span>
+    <span class="sql-keyword">RETURN</span> <span class="sql-string">'PASS: Test 2.3.3 - SELECT from FINANCE.finance_transactions failed as expected. Error: '</span> || SQLERRM;
+<span class="sql-keyword">END;</span>
 
 
 <span class="sql-comment">-- --- 2.4: TEST ABSTRACT ROLE USAGE (as Finance Analyst) ---</span>
-<span class="sql-comment">-- This test proves that users CANNOT directly use</span>
-<span class="sql-comment">-- the abstract roles they inherit from.</span>
-
-<span class->USE ROLE</span> Finance_Analyst_User;
-
-<span class="sql-comment">-- Test 1: Try to use the Functional Role (FAILURE expected)</span>
-<span class="sql-keyword">USE ROLE</span> DATASCIENTIST;
-<span class="sql-comment">-- -> This should fail. The user 'test_fin_analyst' was</span>
-<span class="sql-comment">--    not granted 'DATASCIENTIST' directly.</span>
-
-<span class="sql-comment">-- Test 2: Try to use the Privilege Role (FAILURE expected)</span>
-<span class="sql-keyword">USE ROLE</span> finance_RW;
-<span class="sql-comment">-- -> This should fail. The user was not granted</span>
-<span class="sql-comment">--    'finance_RW' directly.</span>
-
-<span class="sql-comment">-- Test 3: Revert to the Business Role (SUCCESS expected)</span>
 <span class="sql-keyword">USE ROLE</span> Finance_Analyst_User;
-<span class="sql-comment">-- -> This works, as it's the user's default/granted role.</span>
+
+<span class="sql-comment">-- Test 2.4.1: Try to use the Functional Role (FAILURE expected)</span>
+<span class="sql-keyword">BEGIN</span>
+  <span class="sql-keyword">USE ROLE</span> DATASCIENTIST;
+  <span class="sql-keyword">RETURN</span> <span class="sql-string">'FAIL: Test 2.4.1 - USE ROLE DATASCIENTIST succeeded but should have failed.'</span>;
+<span class="sql-keyword">EXCEPTION</span>
+  <span class="sql-keyword">WHEN OTHER THEN</span>
+    <span class="sql-keyword">RETURN</span> <span class="sql-string">'PASS: Test 2.4.1 - USE ROLE DATASCIENTIST failed as expected. Error: '</span> || SQLERRM;
+<span class="sql-keyword">END;</span>
+
+<span class="sql-comment">-- Test 2.4.2: Try to use the Privilege Role (FAILURE expected)</span>
+<span class="sql-keyword">BEGIN</span>
+  <span class="sql-keyword">USE ROLE</span> finance_RW;
+  <span class="sql-keyword">RETURN</span> <span class="sql-string">'FAIL: Test 2.4.2 - USE ROLE finance_RW succeeded but should have failed.'</span>;
+<span class="sql-keyword">EXCEPTION</span>
+  <span class="sql-keyword">WHEN OTHER THEN</span>
+    <span class="sql-keyword">RETURN</span> <span class="sql-string">'PASS: Test 2.4.2 - USE ROLE finance_RW failed as expected. Error: '</span> || SQLERRM;
+<span class="sql-keyword">END;</span>
+
+<span class="sql-comment">-- Test 2.4.3: Revert to the Business Role (SUCCESS expected)</span>
+<span class="sql-keyword">BEGIN</span>
+  <span class="sql-keyword">USE ROLE</span> Finance_Analyst_User;
+  <span class="sql-keyword">RETURN</span> <span class="sql-string">'PASS: Test 2.4.3 - USE ROLE Finance_Analyst_User succeeded as expected.'</span>;
+<span class="sql-keyword">EXCEPTION</span>
+  <span class="sql-keyword">WHEN OTHER THEN</span>
+    <span class="sql-keyword">RETURN</span> <span class="sql-string">'FAIL: Test 2.4.3 - USE ROLE Finance_Analyst_User failed. Error: '</span> || SQLERRM;
+<span class="sql-keyword">END;</span>
 
 
 <span class="sql-comment">-- =========================================================</span>
@@ -951,7 +1047,7 @@ DROP ROLE IF EXISTS business_role_admin;
 
             prevButton.addEventListener('click', () => {
                 if (currentSlide > 0) {
-                    showSlide(currentSlide + 1);
+                    showSlide(currentSlide - 1); // <-- This was the bug (was + 1)
                 }
             });
 
@@ -971,6 +1067,41 @@ DROP ROLE IF EXISTS business_role_admin;
                         // If it's closed, open it to its full scrollHeight
                         content.style.maxHeight = content.scrollHeight + "px";
                     }
+                });
+            });
+
+            // --- NEW: Copy Button Logic ---
+            const copyButtons = document.querySelectorAll('.copy-button');
+            copyButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const contentDiv = this.parentElement;
+                    const pre = contentDiv.querySelector('pre');
+                    const code = pre.querySelector('code');
+                    const codeText = code.innerText;
+                    
+                    // Use hidden textarea to copy text
+                    // This is the most reliable method for iframe clipboard access
+                    const textArea = document.createElement('textarea');
+                    textArea.value = codeText;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        
+                        // Visual Feedback
+                        this.textContent = 'Copied!';
+                        this.classList.add('copied');
+                        
+                        setTimeout(() => {
+                            this.textContent = 'Copy';
+                            this.classList.remove('copied');
+                        }, 2000);
+
+                    } catch (err) {
+                        console.error('Failed to copy text: ', err);
+                        this.textContent = 'Error';
+                    }
+                    document.body.removeChild(textArea);
                 });
             });
 
